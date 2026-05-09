@@ -22,6 +22,14 @@ const GROUPS: NavGroup[] = [
     items: [
       { href: "/dashboard", label: "Visão geral", icon: "i-layers" },
       { href: "/dashboard/citizens", label: "Cidadãos", icon: "i-people" },
+      { href: "/dashboard/canais", label: "Canais de captura", icon: "i-meg" },
+    ],
+  },
+  {
+    label: "Regulatório",
+    items: [
+      { href: "/dashboard/condicionantes", label: "Condicionantes", icon: "i-aud" },
+      { href: "/dashboard/esg-report", label: "Relatório CSRD", icon: "i-doc-selo" },
     ],
   },
   {
@@ -29,7 +37,6 @@ const GROUPS: NavGroup[] = [
     items: [
       { href: "/dashboard/oportunidades", label: "Oportunidades", icon: "i-broto" },
       { href: "/dashboard/alocacao", label: "Alocação ESG", icon: "i-pizza" },
-      { href: "/dashboard/esg-report", label: "Relatório CSRD", icon: "i-doc-selo" },
     ],
   },
 ];

@@ -8,6 +8,8 @@ import type {
   Citizen,
   CitizenHistory,
   CityId,
+  Conditionant,
+  ConditionantStatus,
   ESGFramework,
   ESGReportFragment,
   OpportunityAggregate,
@@ -228,6 +230,64 @@ export async function fundOpportunity(ideaId: string): Promise<{
     { method: "POST", cache: "no-store" }
   );
   return jsonOrThrow(res);
+}
+
+// ──────────────────────────────────────────────────────────
+// Indicadores municipais (IBGE / INEP / ANM / DataSUS)
+// ──────────────────────────────────────────────────────────
+export type MunicipalIndicatorsDTO = {
+  cityId: CityId;
+  populacao: number;
+  idh: number;
+  ideb: number;
+  pibMunicipal: number;
+  evasaoEscolar: number;
+  cfemAnualReceived: number;
+  saneamentoBasico: number;
+  doencasRespiratorias: number;
+  dependenciaMineral: number;
+  ibgeCode: string;
+  uf: string;
+  populacaoEstimadaIBGE: number;
+  lastUpdated: string;
+};
+
+export async function getMunicipalIndicators(
+  cityId: CityId
+): Promise<MunicipalIndicatorsDTO | null> {
+  const res = await fetch(
+    url(`/api/dashboard/municipal-indicators?cityId=${cityId}`),
+    { cache: "no-store" }
+  );
+  return jsonOrThrow<MunicipalIndicatorsDTO | null>(res);
+}
+
+// ──────────────────────────────────────────────────────────
+// Condicionantes ambientais e regulatorias
+// ──────────────────────────────────────────────────────────
+export type ConditionantsResponse = {
+  conditionants: Conditionant[];
+  summary: {
+    total: number;
+    emPrazo: number;
+    emRisco: number;
+    vencidas: number;
+    nextDeadline?: string;
+  };
+};
+
+export async function getConditionants(opts?: {
+  cityId?: CityId;
+  status?: ConditionantStatus;
+}): Promise<ConditionantsResponse> {
+  const params = new URLSearchParams();
+  if (opts?.cityId) params.set("cityId", opts.cityId);
+  if (opts?.status) params.set("status", opts.status);
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  const res = await fetch(url(`/api/dashboard/conditionants${qs}`), {
+    cache: "no-store",
+  });
+  return jsonOrThrow<ConditionantsResponse>(res);
 }
 
 // ──────────────────────────────────────────────────────────

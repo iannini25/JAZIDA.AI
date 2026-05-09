@@ -164,6 +164,27 @@ export type Alert = {
 };
 
 // ──────────────────────────────────────────────────────────
+// Condicionantes ambientais e regulatorias (licenciamento)
+// ──────────────────────────────────────────────────────────
+export type ConditionantAgency = "IBAMA" | "SEMAD" | "ANM" | "DNPM";
+export type ConditionantStatus = "em-prazo" | "em-risco" | "vencida";
+
+export type Conditionant = {
+  id: string; // ex: "CC-04"
+  agency: ConditionantAgency;
+  description: string; // ex: "Plano de Controle de Material Particulado"
+  deadline: string; // ISO
+  status: ConditionantStatus;
+  cityId: CityId;
+  // Vinculacao com sinais comunitarios — alertas que evidenciam descumprimento
+  linkedAlertIds: string[];
+  // Linhas de orcamento ESG que sustentam essa condicionante
+  linkedAllocationLines: string[];
+  // KPI alvo amarrado a essa condicionante
+  targetKpi?: string;
+};
+
+// ──────────────────────────────────────────────────────────
 // ESG report (Pacto)
 // ──────────────────────────────────────────────────────────
 export type ESGFramework = "CSRD" | "CVM59" | "GRI" | "ICMM";

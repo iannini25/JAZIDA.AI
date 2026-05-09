@@ -14,6 +14,7 @@ import type {
   Alert,
   Citizen,
   Complaint,
+  Conditionant,
   TalentEntry,
 } from "@/types";
 
@@ -40,6 +41,12 @@ export function runSeed(): {
   // mesmo quando o DB ja tem cidadaos de um seed anterior
   if (db.citizens.length > 0) {
     seedDefaultUsers();
+    // Idempotencia por entidade: garante que condicionantes existam tambem
+    // mesmo em DB seedeado em versao anterior do app (sem o conceito).
+    if (db.conditionants.length === 0) {
+      db.conditionants.push(...buildConditionants());
+      saveDb();
+    }
     return {
       citizens: db.citizens,
       talents: db.talents,
@@ -363,6 +370,13 @@ export function runSeed(): {
   };
   db.alerts.push(alertPoeira);
 
+  // ──────────────────────────────────────────────────────────
+  // Condicionantes — primeira inicializacao
+  // ──────────────────────────────────────────────────────────
+  // CC-04 e linkado ao alerta de poeira que acabamos de criar.
+  const condicionantes = buildConditionants(alertPoeira.id);
+  db.conditionants.push(...condicionantes);
+
   // Eventos de agent representativos (agentName capitalizado conforme master)
   emitAgentEvent({
     id: newId(),
@@ -407,4 +421,80 @@ export function runSeed(): {
     complaints: db.complaints,
     alerts: db.alerts,
   };
+}
+
+// ──────────────────────────────────────────────────────────
+// Condicionantes ambientais & regulatorias — Mariana, MG
+//
+// Plausiveis pra mineradora de ferro em Mariana com licenca de operacao
+// junto ao IBAMA + SEMAD-MG + ANM. CC-04 fica em risco se ja houver
+// alerta de poeira no Centro (descumprimento do plano de controle de
+// material particulado) — por isso aceita alertId opcional pra linkar.
+// ──────────────────────────────────────────────────────────
+function buildConditionants(linkedAlertIdForPoeira?: string): Conditionant[] {
+  const NOW = Date.now();
+  const days = (n: number) => new Date(NOW + n * 86_400_000).toISOString();
+
+  return [
+    {
+      id: "CC-04",
+      agency: "IBAMA",
+      description:
+        "Plano de Controle de Material Particulado — monitoramento e mitigacao da poeira gerada pela operacao",
+      deadline: days(45),
+      status: "em-risco",
+      cityId: CITY,
+      linkedAlertIds: linkedAlertIdForPoeira ? [linkedAlertIdForPoeira] : [],
+      linkedAllocationLines: ["ar/poeira", "mineradora-direto"],
+      targetKpi: "Reduzir queixas de ar/poeira no Centro em 40% (90 dias)",
+    },
+    {
+      id: "CC-12",
+      agency: "SEMAD",
+      description:
+        "Programa de Educacao Ambiental — capacitacao comunitaria sobre impactos da mineracao",
+      deadline: days(120),
+      status: "em-prazo",
+      cityId: CITY,
+      linkedAlertIds: [],
+      linkedAllocationLines: ["educacao-publica", "educacao"],
+      targetKpi: "120 cidadaos formados em curso tecnico ambiental",
+    },
+    {
+      id: "CC-19",
+      agency: "IBAMA",
+      description:
+        "Plano de Recuperacao de Areas Degradadas (PRAD) — restauracao da vegetacao e do solo no entorno da cava",
+      deadline: days(210),
+      status: "em-prazo",
+      cityId: CITY,
+      linkedAlertIds: [],
+      linkedAllocationLines: ["agua", "saneamento"],
+      targetKpi: "180 hectares com cobertura vegetal restaurada",
+    },
+    {
+      id: "CC-23",
+      agency: "ANM",
+      description:
+        "Programa de Comunicacao Social — canal formal de escuta da comunidade afetada (Resolucao ANM 95/2022)",
+      deadline: days(30),
+      status: "em-prazo",
+      cityId: CITY,
+      linkedAlertIds: [],
+      linkedAllocationLines: ["comercio", "outro"],
+      targetKpi: "100% das queixas com protocolo emitido em ate 48h",
+    },
+    {
+      id: "CC-31",
+      agency: "DNPM",
+      description:
+        "Programa de Apoio ao Desenvolvimento Local — Just Transition pos-mineracao",
+      deadline: days(180),
+      status: "em-prazo",
+      cityId: CITY,
+      linkedAlertIds: [],
+      linkedAllocationLines: ["arte/cultura", "moda/costura", "comercio"],
+      targetKpi: "25 MEIs criados via JAZIDA Marketplace ate 2026-Q4",
+    },
+  ];
 }

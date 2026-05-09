@@ -11,6 +11,7 @@ import type {
   CityId,
   Citizen,
   Complaint,
+  Conditionant,
   ESGReportFragment,
   RateLimitEntry,
   ReplicaMessage,
@@ -29,6 +30,7 @@ export type DB = {
   replicas: ReplicaMessage[];
   esgFragments: ESGReportFragment[];
   businessIdeas: BusinessIdea[];
+  conditionants: Conditionant[];
   // cache do ultimo snapshot por cidade
   sentimentByCity: Partial<Record<CityId, SentimentSnapshot>>;
   // contador para protocolNumber sequencial
@@ -51,6 +53,7 @@ function emptyDb(): DB {
     replicas: [],
     esgFragments: [],
     businessIdeas: [],
+    conditionants: [],
     sentimentByCity: {},
     protocolCounter: 0,
     fundedIdeaIds: [],
