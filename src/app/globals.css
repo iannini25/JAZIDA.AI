@@ -2,24 +2,381 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tokens (00_contexto_master.md) */
-:root {
-  --brand-green: #047857;
-  --brand-green-light: #10b981;
-  --brand-bg: #f9fafb;
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --accent-gold: #d4a017;
-  --accent-red: #dc2626;
-  --accent-amber: #f59e0b;
+/* ==========================================================
+   Sistema Visual Strata — tokens em CSS vars.
+   SOLO (papel cremoso, cidadao) | SUBSOLO (tinta, mineradora).
+   ========================================================== */
 
-  --font-display: "Georgia", serif;
-  --font-body: "Inter", system-ui, sans-serif;
+:root {
+  /* Solo — superficie clara */
+  --solo-papel: #f4efe6;
+  --solo-papel-fundo: #eae3d6;
+  --solo-papel-claro: #fbf8f2;
+  --solo-tinta: #1a1816;
+  --solo-tinta-suave: #4a4541;
+  --solo-tinta-tenue: #8a8278;
+  --solo-linha: #d9d2c2;
+  --solo-linha-forte: #b8ae9a;
+
+  /* Subsolo — superficie escura */
+  --subsolo-tinta: #15140f;
+  --subsolo-tinta-2: #1e1d17;
+  --subsolo-tinta-3: #25241d;
+  --subsolo-tinta-4: #2e2c24;
+  --subsolo-osso: #e9e5dd;
+  --subsolo-osso-suave: #a8a296;
+  --subsolo-osso-tenue: #6e695e;
+  --subsolo-linha: #2e2c24;
+  --subsolo-linha-forte: #3e3b33;
+
+  /* Brand & minerais */
+  --jazida-verde: #2c5f4a;
+  --jazida-verde-vivo: #3f8060;
+  --jazida-verde-aura: rgba(63, 128, 96, 0.12);
+  --ferro: #b45a2c;
+  --ferro-tenue: rgba(180, 90, 44, 0.12);
+  --ocre: #c9a961;
+  --ocre-tenue: rgba(201, 169, 97, 0.14);
+  --cobre: #8c5a3c;
+  --grafite: #4a4845;
+
+  /* Sinais */
+  --sinal-critico: #a83a28;
+  --sinal-alerta: #c9853a;
+  --sinal-atencao: #c9a961;
+  --sinal-estavel: #2c5f4a;
+  --sinal-info: #3d6f8f;
+
+  /* Motion */
+  --ease-strata: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Sombras (parcimoniosas) */
+  --sombra-papel: 0 1px 0 rgba(26, 24, 22, 0.04);
+  --sombra-modal: 0 24px 48px -12px rgba(26, 24, 22, 0.45);
+  --sombra-foco: 0 0 0 3px var(--jazida-verde-aura);
+
+  /* Aliases legacy — manter durante migracao */
+  --brand-green: var(--jazida-verde);
+  --brand-green-light: var(--jazida-verde-vivo);
+  --brand-bg: var(--solo-papel-fundo);
+  --text-primary: var(--solo-tinta);
+  --text-secondary: var(--solo-tinta-suave);
+  --accent-gold: var(--ocre);
+  --accent-red: var(--sinal-critico);
+  --accent-amber: var(--sinal-alerta);
+  --font-display: "Newsreader", Georgia, serif;
+  --font-body: "Inter Tight", Inter, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
 html,
 body {
-  background: var(--brand-bg);
-  color: var(--text-primary);
+  background: var(--solo-papel-fundo);
+  color: var(--solo-tinta);
   font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================================
+   Type tokens
+   ========================================================== */
+.display-xl {
+  font-family: var(--font-display);
+  font-size: 48px;
+  line-height: 1.05;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+.display-l {
+  font-family: var(--font-display);
+  font-size: 36px;
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: -0.022em;
+}
+.display-m {
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 500;
+  letter-spacing: -0.018em;
+}
+.display-s {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+}
+.body-l {
+  font-size: 16px;
+  line-height: 1.55;
+  font-weight: 400;
+}
+.body-strata {
+  font-size: 14px;
+  line-height: 1.55;
+  font-weight: 400;
+}
+.body-s {
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+.caption {
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 400;
+}
+.micro {
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.mono-l {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.mono-m {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.mono-s {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* ==========================================================
+   Surface helpers
+   ========================================================== */
+.surface-solo {
+  background: var(--solo-papel-claro);
+  border: 1px solid var(--solo-linha);
+  border-radius: 10px;
+}
+.surface-subsolo {
+  background: var(--subsolo-tinta-2);
+  border: 1px solid var(--subsolo-linha);
+  border-radius: 10px;
+  color: var(--subsolo-osso);
+}
+
+/* Hairlines — Strata nao usa sombras pesadas em separadores */
+.rule {
+  height: 1px;
+  background: var(--solo-linha);
+}
+.rule-strong {
+  height: 1px;
+  background: var(--solo-linha-forte);
+}
+
+.dark-scope {
+  background: var(--subsolo-tinta);
+  color: var(--subsolo-osso);
+}
+.dark-scope .rule {
+  background: var(--subsolo-linha);
+}
+.dark-scope .rule-strong {
+  background: var(--subsolo-linha-forte);
+}
+
+/* ==========================================================
+   Componentes-chave do sistema visual
+   ========================================================== */
+
+/* Big-button (cidadao home) */
+.strata-big-btn {
+  background: var(--solo-papel-claro);
+  border: 1px solid var(--solo-linha);
+  border-radius: 10px;
+  padding: 24px;
+  min-height: 144px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition:
+    border-color 200ms var(--ease-strata),
+    background 200ms var(--ease-strata);
+  text-align: left;
+}
+.strata-big-btn:hover {
+  border-color: var(--jazida-verde);
+  background: var(--solo-papel);
+}
+
+/* Inputs */
+.strata-input {
+  background: var(--solo-papel-claro);
+  border: 1px solid var(--solo-linha-forte);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--solo-tinta);
+  width: 100%;
+  transition:
+    border-color 160ms var(--ease-strata),
+    box-shadow 160ms var(--ease-strata);
+  font-family: inherit;
+}
+.strata-input:focus {
+  outline: none;
+  border-color: var(--jazida-verde);
+  box-shadow: var(--sombra-foco);
+}
+.strata-input::placeholder {
+  color: var(--solo-tinta-tenue);
+  font-style: italic;
+}
+.strata-input-sub {
+  background: var(--subsolo-tinta-2);
+  border-color: var(--subsolo-linha-forte);
+  color: var(--subsolo-osso);
+}
+.strata-input-sub::placeholder {
+  color: var(--subsolo-osso-tenue);
+}
+
+/* Buttons */
+.strata-btn {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0 20px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition:
+    background 140ms var(--ease-strata),
+    border-color 160ms var(--ease-strata),
+    color 140ms var(--ease-strata);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.strata-btn-primary {
+  background: var(--jazida-verde);
+  color: var(--solo-papel-claro);
+}
+.strata-btn-primary:hover {
+  background: var(--jazida-verde-vivo);
+}
+.strata-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.strata-btn-outline-solo {
+  background: transparent;
+  border-color: var(--solo-linha-forte);
+  color: var(--solo-tinta);
+}
+.strata-btn-outline-solo:hover {
+  border-color: var(--solo-tinta);
+}
+.strata-btn-outline-sub {
+  background: transparent;
+  border-color: var(--subsolo-linha-forte);
+  color: var(--subsolo-osso);
+}
+.strata-btn-outline-sub:hover {
+  border-color: var(--subsolo-osso);
+}
+.strata-btn-ghost {
+  background: transparent;
+  color: var(--solo-tinta);
+}
+.strata-btn-ghost:hover {
+  background: var(--solo-papel-fundo);
+}
+.strata-btn-lg {
+  height: 52px;
+  padding: 0 24px;
+  font-size: 15px;
+}
+
+/* Chips — pillulas mono */
+.strata-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border: 1px solid var(--solo-linha-forte);
+  border-radius: 4px;
+  color: var(--solo-tinta-suave);
+  background: var(--solo-papel-claro);
+  text-transform: lowercase;
+}
+.strata-chip-sub {
+  border-color: var(--subsolo-linha-forte);
+  color: var(--subsolo-osso-suave);
+  background: var(--subsolo-tinta-2);
+}
+.strata-chip-mineral {
+  border-color: rgba(180, 90, 44, 0.4);
+  color: var(--ferro);
+  background: var(--ferro-tenue);
+}
+.strata-chip-verde {
+  border-color: rgba(63, 128, 96, 0.45);
+  color: var(--jazida-verde);
+  background: var(--jazida-verde-aura);
+}
+
+/* Protocol badge — caixa editorial */
+.strata-proto {
+  border: 1px double var(--ferro);
+  background: var(--solo-papel);
+  padding: 18px 20px;
+  border-radius: 4px;
+}
+
+/* Core sample — cilindro de estratos */
+.strata-core-cyl {
+  border: 1px solid var(--solo-linha-forte);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--solo-papel);
+}
+.dark-scope .strata-core-cyl {
+  border-color: var(--subsolo-linha-forte);
+  background: var(--subsolo-tinta-2);
+}
+
+/* Scrollbars subtle */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--solo-linha-forte);
+  border-radius: 999px;
+}
+.dark-scope ::-webkit-scrollbar-thumb {
+  background: var(--subsolo-linha-forte);
+}
+
+/* Form controls accent color */
+input[type="radio"],
+input[type="checkbox"] {
+  accent-color: var(--jazida-verde);
 }

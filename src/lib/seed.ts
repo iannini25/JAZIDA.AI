@@ -35,8 +35,11 @@ export function runSeed(): {
   complaints: Complaint[];
   alerts: Alert[];
 } {
-  // Idempotente
+  // Sempre tenta criar usuarios (idempotente internamente)
+  // Precisa rodar ANTES do early-return pra garantir que users existam
+  // mesmo quando o DB ja tem cidadaos de um seed anterior
   if (db.citizens.length > 0) {
+    seedDefaultUsers();
     return {
       citizens: db.citizens,
       talents: db.talents,
@@ -95,6 +98,8 @@ export function runSeed(): {
       category: "saude",
       confidence: 0.92,
     },
+    matchApprovalStatus: "approved",
+    matchApprovedBy: "sustentabilidade",
     matches: [
       {
         type: "course",
@@ -137,6 +142,8 @@ export function runSeed(): {
       category: "tecnologia",
       confidence: 0.88,
     },
+    matchApprovalStatus: "approved",
+    matchApprovedBy: "sustentabilidade",
     matches: [
       {
         type: "course",

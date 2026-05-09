@@ -1,12 +1,13 @@
-// Layout do Dashboard da Mineradora — desktop-first com sidebar lateral.
+// Layout do Dashboard — Strata Subsolo. Sidebar lateral + tinta escura.
 import "../globals.css";
 import type { Metadata } from "next";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import { IconSprite } from "@/components/ui/Icons";
 
 export const metadata: Metadata = {
-  title: "JAZIDA · Dashboard da Mineradora",
+  title: "JAZIDA · Painel da mineradora",
   description:
-    "Sentimento, alertas, agents ao vivo e relatorio ESG da operacao em Mariana.",
+    "Painel de inteligencia territorial: sentimento, alertas, agentes, ESG.",
 };
 
 export default function DashboardLayout({
@@ -15,7 +16,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen w-full bg-brand-bg text-text-primary">
+    <div className="dark-scope flex min-h-screen w-full">
+      <IconSprite />
       <DashboardSidebar />
       <div className="flex min-w-0 flex-1 flex-col">{children}</div>
     </div>

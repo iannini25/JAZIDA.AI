@@ -1,51 +1,30 @@
 "use client";
 
-// AgentCascade — mostra agents trabalhando ao vivo durante o "processando".
+// AgentCascade — cascata de agents. Sistema Strata: substitui spinner por
+// CoreSample (cilindro de testemunho geologico) + lista de estratos numerada.
 //
-// Modo simulado: passa `steps` com nomes (ex: ["Acolhida", "Talento", "Bussola"])
-// e o componente anima cada um sequencialmente com delay configuravel.
-// Modo externo: passa `events` que ja contem status — usado quando o caller
-// alimenta via SSE.
+// Modo simulado: passa `steps` com nomes; componente anima sequencialmente.
+// Modo controlado: passa `events` que ja vem com status (alimentado por SSE).
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { CoreSample, type CoreStratum } from "@/components/ui/CoreSample";
 
-export type CascadeStep = {
-  agent: string;
-  description?: string;
-};
-
+export type CascadeStep = { agent: string; description?: string };
 export type CascadeEvent = CascadeStep & {
   status: "pending" | "running" | "done";
 };
 
 export type AgentCascadeProps = {
-  steps?: CascadeStep[]; // modo simulado
-  events?: CascadeEvent[]; // modo externo (alimentado pelo caller)
-  stepDelayMs?: number; // delay entre steps no modo simulado
+  steps?: CascadeStep[];
+  events?: CascadeEvent[];
+  stepDelayMs?: number;
   className?: string;
   onComplete?: () => void;
 };
 
-const AGENT_LABELS: Record<string, string> = {
-  Acolhida: "Acolhida ouvindo",
-  Talento: "Talento entendendo",
-  Voz: "Voz classificando",
-  Bussola: "Bussola buscando caminhos",
-  Replica: "Replica preparando resposta",
-  Pulsar: "Pulsar atualizando sentimento",
-  Pacto: "Pacto gerando relatorio",
-  Semente: "Semente analisando ideia",
-  "Semente · demanda": "Semente cruzando demanda da cidade",
-  "Semente · competicao": "Semente medindo competicao",
-  "Semente · plano": "Semente montando plano de acao",
-};
-
 export function AgentCascade(props: AgentCascadeProps) {
   const isControlled = !!props.events;
-  const stepDelayMs = props.stepDelayMs ?? 700;
-
+  const stepDelayMs = props.stepDelayMs ?? 800;
   const [internalIndex, setInternalIndex] = useState(0);
 
   useEffect(() => {
@@ -70,78 +49,73 @@ export function AgentCascade(props: AgentCascadeProps) {
               : "pending",
       }));
 
+  const strata: CoreStratum[] = events.map((e) => ({
+    agent: agentName(e.agent),
+    status: e.status,
+    label: e.description ? `${agentName(e.agent)} — ${e.description}` : agentName(e.agent),
+  }));
+
   return (
-    <div className={cn("flex flex-col gap-3", props.className)}>
-      <AnimatePresence>
-        {events.map((e, i) => {
-          const visible = e.status !== "pending" || i <= internalIndex;
-          if (!visible) return null;
-          return (
-            <motion.div
-              key={`${e.agent}-${i}`}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className={cn(
-                "flex items-center gap-3 rounded-xl border px-4 py-3 transition-colors",
-                e.status === "done"
-                  ? "border-brand-green-light bg-brand-green-light/10"
-                  : e.status === "running"
-                    ? "border-brand-green bg-white shadow-sm"
-                    : "border-gray-200 bg-gray-50 opacity-70"
-              )}
-            >
-              <StatusDot status={e.status} />
-              <div className="flex-1 text-text-primary">
-                <div className="text-sm font-semibold">
-                  {AGENT_LABELS[e.agent] ?? e.agent}
-                </div>
-                {e.description && (
-                  <div className="text-xs text-text-secondary">
-                    {e.description}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
-      </AnimatePresence>
+    <div className={props.className}>
+      <div className="grid items-stretch gap-6" style={{ gridTemplateColumns: "88px 1fr" }}>
+        <CoreSample strata={strata} variant="hero" />
+        <ol className="flex flex-col justify-between border-l border-solo-linha pl-4">
+          {events.map((e, i) => (
+            <li key={i} className="flex flex-col gap-0.5 py-1.5">
+              <span className="micro text-solo-tinta-tenue">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <span
+                className="body-strata font-medium"
+                style={{
+                  color:
+                    e.status === "pending"
+                      ? "var(--solo-tinta-tenue)"
+                      : "var(--solo-tinta)",
+                }}
+              >
+                {agentName(e.agent)}
+              </span>
+              <StatusGloss status={e.status} description={e.description} />
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
   );
 }
 
-function StatusDot({ status }: { status: CascadeEvent["status"] }) {
+function StatusGloss({
+  status,
+  description,
+}: {
+  status: CascadeEvent["status"];
+  description?: string;
+}) {
   if (status === "done") {
     return (
-      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-green text-white">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="18"
-          height="18"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden
-        >
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
+      <span className="caption text-jazida-verde">
+        ✓ {description ?? "ouvido"}
       </span>
     );
   }
   if (status === "running") {
     return (
-      <span className="flex h-7 w-7 items-center justify-center">
-        <span className="h-5 w-5 animate-spin rounded-full border-2 border-brand-green border-t-transparent" />
+      <span className="caption inline-flex items-center gap-1.5 text-ferro">
+        <span className="inline-block h-1.5 w-1.5 animate-pulse-dot rounded-full bg-ferro" />
+        {description ?? "em curso"}
       </span>
     );
   }
   return (
-    <span className="flex h-7 w-7 items-center justify-center">
-      <span className="h-3 w-3 rounded-full bg-gray-300" />
+    <span className="caption text-solo-tinta-tenue">
+      {description ? description : "aguardando"}
     </span>
   );
+}
+
+function agentName(raw: string): string {
+  // strip prefix "Semente · X" -> "Semente"
+  if (raw.startsWith("Semente")) return "Semente";
+  return raw;
 }

@@ -1,7 +1,7 @@
 "use client";
 
-// ESGReportPreview — renderiza um (ou varios) ESGReportFragment com fonte serif
-// e estilo de documento corporativo.
+// ESGReportPreview Strata — documento corporativo. Newsreader serif,
+// hairlines, evidencias chip-style mono.
 
 import ReactMarkdown from "react-markdown";
 import type { ESGReportFragment } from "@/types";
@@ -15,12 +15,12 @@ export function ESGReportPreview({
 }: {
   fragments: ESGReportFragment[];
   className?: string;
-  showAll?: boolean; // se false, mostra so o primeiro fragment
+  showAll?: boolean;
   emptyHint?: string;
 }) {
   if (fragments.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-gray-200 bg-white p-6 text-center text-sm text-text-secondary">
+      <div className="rounded-[10px] border border-dashed border-subsolo-linha-forte p-6 text-center body-s text-subsolo-osso-tenue">
         {emptyHint || "Nenhum rascunho gerado ainda."}
       </div>
     );
@@ -31,27 +31,24 @@ export function ESGReportPreview({
       {visible.map((f, i) => (
         <article
           key={i}
-          className="rounded-xl border border-gray-200 bg-white p-5"
-          style={{ fontFamily: "Georgia, serif" }}
+          className="rounded-[10px] border border-subsolo-linha-forte bg-subsolo-tinta-3 p-5 text-subsolo-osso"
+          style={{ fontFamily: "var(--font-display)" }}
         >
-          <header className="flex items-center justify-between border-b border-gray-100 pb-2 text-[10px] uppercase tracking-widest text-text-secondary">
-            <span>{f.framework} · {f.section}</span>
+          <header className="flex items-center justify-between border-b border-subsolo-linha pb-2 micro text-subsolo-osso-tenue">
+            <span>
+              {f.framework} · {f.section}
+            </span>
             <span>JAZIDA · Mariana</span>
           </header>
-          <div className="prose-jazida mt-3 text-sm leading-relaxed text-text-primary">
+          <div className="esg-prose mt-3 body-strata text-subsolo-osso">
             <ReactMarkdown>{f.content}</ReactMarkdown>
           </div>
           {f.evidence && f.evidence.length > 0 && (
-            <footer className="mt-4 border-t border-gray-100 pt-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">
-                Evidencias
-              </p>
-              <ul className="mt-1 flex flex-wrap gap-2">
+            <footer className="mt-4 border-t border-subsolo-linha pt-3">
+              <p className="micro text-subsolo-osso-tenue">Evidencias</p>
+              <ul className="mt-2 flex flex-wrap gap-2">
                 {f.evidence.slice(0, 8).map((e, j) => (
-                  <li
-                    key={j}
-                    className="rounded-md bg-brand-bg px-2 py-1 font-mono text-[10px] text-text-primary"
-                  >
+                  <li key={j} className="strata-chip strata-chip-sub" style={{ fontSize: 10 }}>
                     {e.type}: {e.reference}
                   </li>
                 ))}

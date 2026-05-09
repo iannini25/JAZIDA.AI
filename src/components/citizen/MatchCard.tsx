@@ -1,10 +1,10 @@
 "use client";
 
-// MatchCard — card visual pra cada resultado da Bussola.
-// course=azul/livro · job=verde/maleta · entrepreneurship=ouro/foguete
+// MatchCard Strata — card editorial de resultado da Bussola.
+// Microlabel numerado + tipo + afinidade %. Sem emoji. Hairline borders.
 
-import { motion } from "framer-motion";
 import type { BussolaMatch } from "@/types";
+import { Icon, type IconName } from "@/components/ui/Icons";
 import { cn } from "@/lib/utils";
 
 export type MatchCardProps = {
@@ -16,92 +16,74 @@ export type MatchCardProps = {
 
 const TYPE_META: Record<
   BussolaMatch["type"],
-  { icon: string; label: string; chipClass: string }
+  { icon: IconName; label: string; mineral: string }
 > = {
-  course: {
-    icon: "📚",
-    label: "Curso",
-    chipClass: "bg-blue-100 text-blue-800",
-  },
-  job: {
-    icon: "💼",
-    label: "Vaga",
-    chipClass: "bg-emerald-100 text-emerald-800",
-  },
-  entrepreneurship: {
-    icon: "🚀",
-    label: "Empreender",
-    chipClass: "bg-amber-100 text-amber-800",
-  },
+  course: { icon: "i-caderno", label: "Curso", mineral: "var(--ocre)" },
+  job: { icon: "i-caixa", label: "Vaga", mineral: "var(--cobre)" },
+  entrepreneurship: { icon: "i-broto", label: "Empreender", mineral: "var(--ferro)" },
 };
 
 export function MatchCard(props: MatchCardProps) {
   const meta = TYPE_META[props.match.type];
+  const fitPct = Math.round(props.match.fitScore * 100);
+  const orderLabel = String((props.index ?? 0) + 1).padStart(2, "0");
+
   return (
-    <motion.button
+    <button
       type="button"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: (props.index ?? 0) * 0.12 }}
       onClick={() => props.onSelect?.(props.match)}
       className={cn(
-        "group flex w-full flex-col gap-3 rounded-2xl border p-4 text-left transition-all",
-        "hover:border-brand-green hover:shadow-md",
+        "flex w-full flex-col gap-3 rounded-[10px] border bg-solo-papel-claro p-5 text-left transition-all duration-200 ease-strata",
+        "hover:border-jazida-verde hover:bg-solo-papel",
         props.selected
-          ? "border-brand-green bg-brand-green-light/10 shadow-md"
-          : "border-gray-200 bg-white"
+          ? "border-jazida-verde bg-solo-papel"
+          : "border-solo-linha"
       )}
     >
-      <div className="flex items-start gap-3">
-        <span className="text-2xl" aria-hidden>
-          {meta.icon}
-        </span>
-        <div className="flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={cn(
-                "rounded-full px-2 py-0.5 text-xs font-semibold",
-                meta.chipClass
-              )}
-            >
-              {meta.label}
-            </span>
-            <span className="text-xs text-text-secondary">
-              compatibilidade {Math.round(props.match.fitScore * 100)}%
-            </span>
-          </div>
-          <h3 className="mt-1 text-base font-semibold leading-snug text-text-primary">
-            {props.match.title}
-          </h3>
+      <div className="flex items-start justify-between gap-3">
+        <div className="micro" style={{ color: "var(--ferro)" }}>
+          § {orderLabel} · {meta.label} — {fitPct}% afinidade
         </div>
+        <span style={{ color: meta.mineral }}>
+          <Icon name={meta.icon} size={20} />
+        </span>
       </div>
-      <p className="text-sm leading-relaxed text-text-primary">
+
+      <h3
+        className="display-s text-solo-tinta"
+        style={{ fontSize: 22 }}
+      >
+        {props.match.title}
+      </h3>
+
+      <p className="body-strata text-solo-tinta-suave">
         {props.match.description}
       </p>
-      {(props.match.duration || props.match.cost) && (
-        <div className="flex flex-wrap gap-2 text-xs text-text-secondary">
-          {props.match.duration && (
-            <span className="rounded-md bg-gray-100 px-2 py-1">
-              ⏱️ {props.match.duration}
-            </span>
-          )}
-          {props.match.cost && (
-            <span className="rounded-md bg-gray-100 px-2 py-1">
-              💰 {props.match.cost}
-            </span>
-          )}
-        </div>
-      )}
+
+      <div className="mt-1 h-px bg-solo-linha" style={{ width: 32 }} />
+
+      <div className="flex flex-wrap gap-3 text-[11px] text-solo-tinta-tenue">
+        {props.match.duration && (
+          <span className="inline-flex items-center gap-1.5">
+            <Icon name="i-ampul" size={12} /> {props.match.duration}
+          </span>
+        )}
+        {props.match.cost && (
+          <span className="inline-flex items-center gap-1.5">
+            <Icon name="i-barra" size={12} /> {props.match.cost}
+          </span>
+        )}
+      </div>
+
       <span
         className={cn(
-          "mt-1 inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold transition-colors",
-          props.selected
-            ? "bg-brand-green text-white"
-            : "bg-brand-bg text-brand-green group-hover:bg-brand-green group-hover:text-white"
+          "mt-1 inline-flex items-center gap-1.5 text-[13px] font-medium",
+          props.selected ? "text-jazida-verde" : "text-jazida-verde"
         )}
       >
-        {props.selected ? "Selecionado ✓" : "Quero esse caminho"}
+        {props.selected ? "Selecionado" : "Quero esse caminho"}
+        <Icon name="i-arr" size={14} />
       </span>
-    </motion.button>
+    </button>
   );
 }

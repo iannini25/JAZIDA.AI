@@ -1,7 +1,7 @@
 "use client";
 
-// AgentLiveFeed — feed cronologico inverso de eventos de agents.
-// Conecta no SSE, recebe snapshot inicial + push de novos eventos.
+// AgentLiveFeed Strata — log mineral, mono.
+// Cada linha: timestamp · agente (cor mineral) · acao · chip.
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,20 +11,18 @@ import {
   type StreamHandlers,
 } from "@/lib/api/dashboard";
 import type { AgentEvent, AgentName } from "@/types";
+import { CoreSample } from "@/components/ui/CoreSample";
 import { cn } from "@/lib/utils";
 
-const AGENT_THEME: Record<
-  AgentName,
-  { bg: string; ring: string; initial: string }
-> = {
-  Acolhida: { bg: "bg-rose-100", ring: "ring-rose-200", initial: "A" },
-  Talento: { bg: "bg-emerald-100", ring: "ring-emerald-200", initial: "T" },
-  Voz: { bg: "bg-orange-100", ring: "ring-orange-200", initial: "V" },
-  Bussola: { bg: "bg-sky-100", ring: "ring-sky-200", initial: "B" },
-  Replica: { bg: "bg-violet-100", ring: "ring-violet-200", initial: "R" },
-  Pulsar: { bg: "bg-amber-100", ring: "ring-amber-200", initial: "P" },
-  Pacto: { bg: "bg-indigo-100", ring: "ring-indigo-200", initial: "P" },
-  Semente: { bg: "bg-lime-100", ring: "ring-lime-200", initial: "🌱" },
+const AGENT_COLOR: Record<AgentName, string> = {
+  Acolhida: "var(--ocre)",
+  Talento: "var(--jazida-verde-vivo)",
+  Voz: "var(--ferro)",
+  Bussola: "var(--cobre)",
+  Replica: "var(--grafite)",
+  Pulsar: "var(--sinal-info)",
+  Pacto: "var(--jazida-verde-vivo)",
+  Semente: "var(--jazida-verde-vivo)",
 };
 
 export type AgentLiveFeedProps = {
@@ -41,7 +39,6 @@ export function AgentLiveFeed({ limit = 12, className }: AgentLiveFeedProps) {
   useEffect(() => {
     let active = true;
 
-    // Snapshot inicial via REST (caso SSE atrase ou falhe).
     getAgentEvents(limit)
       .then((evs) => {
         if (active) setEvents(evs);
@@ -79,86 +76,97 @@ export function AgentLiveFeed({ limit = 12, className }: AgentLiveFeedProps) {
     };
   }, [limit]);
 
+  // Construir snapshot de strata pra mini CoreSample lateral
+  const lastByAgent: AgentName[] = [
+    "Acolhida",
+    "Talento",
+    "Voz",
+    "Bussola",
+    "Replica",
+    "Pulsar",
+    "Pacto",
+  ];
+  const stratumStatus = lastByAgent.map((agent) => {
+    const recent = events.find((e) => e.agentName === agent);
+    return {
+      agent,
+      status: recent ? ("done" as const) : ("pending" as const),
+    };
+  });
+
   return (
     <div className={cn("flex h-full flex-col gap-3", className)}>
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
-          Agents ao vivo
-        </h3>
-        <ConnectionDot connected={connected} pulse={pulse} />
+        <span
+          className="micro inline-flex items-center gap-1.5"
+          style={{ color: "var(--jazida-verde-vivo)" }}
+        >
+          <span
+            className={cn(
+              "h-1.5 w-1.5 rounded-full bg-jazida-verde-vivo",
+              pulse && "animate-pulse-dot"
+            )}
+          />
+          Live · agentes
+        </span>
+        <ConnectionLabel connected={connected} />
       </div>
 
-      <ul className="flex flex-col gap-2 overflow-y-auto pr-1">
-        <AnimatePresence initial={false}>
-          {events.map((e) => {
-            const theme = AGENT_THEME[e.agentName] ?? {
-              bg: "bg-gray-100",
-              ring: "ring-gray-200",
-              initial: e.agentName[0] || "?",
-            };
-            return (
+      <div className="grid items-start gap-4" style={{ gridTemplateColumns: "48px 1fr" }}>
+        <div className="dark-scope">
+          <CoreSample strata={stratumStatus} variant="mini" />
+        </div>
+        <ul className="flex flex-col overflow-y-auto pr-1">
+          <AnimatePresence initial={false}>
+            {events.map((e) => (
               <motion.li
                 key={e.id}
                 layout
-                initial={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.25 }}
-                className="flex items-start gap-3 rounded-lg border border-gray-100 bg-white p-3"
+                transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
+                className="grid items-center gap-3 border-b border-subsolo-linha py-2 last:border-b-0"
+                style={{ gridTemplateColumns: "70px 90px 1fr auto" }}
               >
-                <div
-                  className={cn(
-                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ring-2",
-                    theme.bg,
-                    theme.ring
-                  )}
+                <span className="mono-s text-subsolo-osso-tenue" style={{ fontSize: 11 }}>
+                  {formatTime(e.timestamp)}
+                </span>
+                <span
+                  className="mono-s lowercase"
+                  style={{
+                    color: AGENT_COLOR[e.agentName] ?? "var(--ocre)",
+                    fontSize: 12,
+                  }}
                 >
-                  {theme.initial}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-sm font-semibold text-text-primary">
-                      {e.agentName}
-                    </span>
-                    <span className="shrink-0 text-[10px] text-text-secondary">
-                      {formatRelative(e.timestamp)}
-                    </span>
-                  </div>
-                  <p className="mt-0.5 line-clamp-2 text-xs text-text-secondary">
-                    {e.action}
-                  </p>
-                </div>
+                  {e.agentName.toLowerCase()}
+                </span>
+                <span className="body-s text-subsolo-osso-suave truncate">
+                  {e.action}
+                </span>
+                {e.payload?.fallback && (
+                  <span className="strata-chip strata-chip-sub" style={{ fontSize: 10 }}>
+                    fallback
+                  </span>
+                )}
               </motion.li>
-            );
-          })}
-        </AnimatePresence>
-        {events.length === 0 && (
-          <li className="rounded-lg border border-dashed border-gray-200 bg-white p-6 text-center text-xs text-text-secondary">
-            Aguardando eventos...
-          </li>
-        )}
-      </ul>
+            ))}
+          </AnimatePresence>
+          {events.length === 0 && (
+            <li className="body-s py-6 text-center text-subsolo-osso-tenue">
+              Aguardando sinais...
+            </li>
+          )}
+        </ul>
+      </div>
     </div>
   );
 }
 
-function ConnectionDot({
-  connected,
-  pulse,
-}: {
-  connected: boolean;
-  pulse: boolean;
-}) {
+function ConnectionLabel({ connected }: { connected: boolean }) {
   return (
-    <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-text-secondary">
-      <span
-        className={cn(
-          "h-2 w-2 rounded-full transition-all",
-          connected ? "bg-brand-green" : "bg-gray-300",
-          pulse && "ring-4 ring-brand-green/30"
-        )}
-      />
-      {connected ? "live" : "offline"}
+    <span className="micro text-subsolo-osso-tenue">
+      {connected ? "conectado" : "offline"}
     </span>
   );
 }
@@ -167,10 +175,15 @@ function dedupe(prev: AgentEvent[], id: string): AgentEvent[] {
   return prev.filter((p) => p.id !== id);
 }
 
-function formatRelative(iso: string): string {
-  const ms = Date.now() - new Date(iso).getTime();
-  if (ms < 5_000) return "agora";
-  if (ms < 60_000) return `${Math.floor(ms / 1000)}s`;
-  if (ms < 60 * 60_000) return `${Math.floor(ms / 60_000)}min`;
-  return `${Math.floor(ms / 3_600_000)}h`;
+function formatTime(iso: string): string {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
 }

@@ -1,6 +1,9 @@
 "use client";
 
-// /app — home do cidadao (pos-login). Mostra acoes disponiveis.
+// /app — home do cidadao (pos-login). Sistema visual Strata.
+//
+// Editorial em segunda pessoa: "{nome}, a gente te ouve.".
+// Big-buttons com microlabel numerado, icone monoline e hairline.
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -8,6 +11,7 @@ import Link from "next/link";
 import { getStoredAuth, clearStoredAuth } from "@/lib/auth-storage";
 import { getStoredCitizenName } from "@/lib/citizen-storage";
 import { logout as apiLogout } from "@/lib/api/auth";
+import { Icon, type IconName } from "@/components/ui/Icons";
 
 export default function CitizenHomePage() {
   const router = useRouter();
@@ -36,10 +40,10 @@ export default function CitizenHomePage() {
 
   if (!bootDone) {
     return (
-      <div className="flex flex-1 items-center justify-center px-6 py-10">
+      <div className="flex flex-1 items-center justify-center px-6 py-12">
         <div className="flex flex-col items-center gap-3 text-center">
-          <span className="text-3xl">🌱</span>
-          <span className="font-mono text-xs text-text-secondary">
+          <Icon name="i-estrato" size={28} className="text-jazida-verde" />
+          <span className="mono-s text-solo-tinta-tenue">
             carregando seu canal...
           </span>
         </div>
@@ -48,99 +52,99 @@ export default function CitizenHomePage() {
   }
 
   return (
-    <main className="flex flex-1 flex-col gap-8 px-6 py-10">
-      <div className="flex items-start justify-between">
+    <main className="flex flex-1 flex-col gap-10 px-6 py-10">
+      <header className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm uppercase tracking-widest text-brand-green">
-            JAZIDA . Mariana, MG
+          <p className="micro" style={{ color: "var(--ferro)" }}>
+            § Inicio {citizenName ? `· ${citizenName}` : ""}
           </p>
-          <h1
-            className="mt-2 text-3xl font-bold leading-tight text-text-primary"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            Sua voz, sua cidade,
-            <br />
-            suas oportunidades.
+          <h1 className="display-l mt-3 text-solo-tinta" style={{ fontSize: 32 }}>
+            {citizenName
+              ? `${citizenName}, a gente te ouve.`
+              : "A gente te ouve."}
           </h1>
-          {citizenName && (
-            <p className="mt-3 text-base text-text-primary">
-              E ai, <strong>{citizenName}</strong>! To aqui contigo. Que cabeca
-              hoje?
-            </p>
-          )}
+          <p className="body-l mt-3 text-solo-tinta-suave">
+            Escolha de onde quer comecar. Sua fala vira sinal classificado, com
+            prazo de resposta e protocolo seu.
+          </p>
         </div>
         <button
           type="button"
           onClick={handleLogout}
-          className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-text-secondary hover:bg-gray-100"
+          className="strata-btn strata-btn-outline-solo"
+          style={{ height: 32, fontSize: 12, padding: "0 12px" }}
         >
           Sair
         </button>
-      </div>
+      </header>
 
       <div className="flex flex-col gap-3">
         <BigButton
           href="/app/talento"
-          emoji="🎯"
+          icon="i-mira"
+          label="§ 01"
           title="Tenho um talento"
-          subtitle="ou um sonho que quero realizar"
+          subtitle="Diga o que sabe fazer. A gente cruza com vagas, cursos e apoios reais da sua cidade."
         />
         <BigButton
           href="/app/empreender"
-          emoji="💡"
+          icon="i-broto"
+          label="§ 02"
           title="Tenho uma ideia de negocio"
-          subtitle="quero saber se vale a pena"
-          badge="novo"
+          subtitle="Conta a ideia. A equipe de investimento social analisa e te retorna pelo whatsapp."
         />
         <BigButton
           href="/app/voz"
-          emoji="📢"
-          title="Quero reclamar / sugerir"
-          subtitle="alguma coisa na cidade"
+          icon="i-meg"
+          label="§ 03"
+          title="Quero reclamar ou sugerir"
+          subtitle="Conta o que ta ruim ou o que pode melhorar. Geramos protocolo e acompanhamos a resposta."
         />
         <BigButton
           href="/app/historia"
-          emoji="📋"
+          icon="i-estela"
+          label="§ 04"
           title="Ver minha historia"
-          subtitle="o que ja foi feito por causa de voce"
+          subtitle="Linha do tempo do que voce ja mandou e o que a Vale fez por causa de voce."
         />
       </div>
 
-      <p className="mt-auto rounded-2xl bg-brand-bg p-4 text-xs leading-relaxed text-text-secondary">
-        O JAZIDA escuta cada cidadao e mostra pra mineradora o que voce ta
-        dizendo. Ninguem fica de fora.
-      </p>
+      <div className="rule" />
+
+      <footer className="surface-solo p-4">
+        <p className="caption text-solo-tinta-tenue">
+          Lei Geral de Protecao de Dados · art. 7. Sua fala e sua. Nao
+          compartilhamos identidade com a mineradora sem seu OK.
+        </p>
+      </footer>
     </main>
   );
 }
 
 function BigButton(props: {
   href: string;
-  emoji: string;
+  icon: IconName;
+  label: string;
   title: string;
   subtitle: string;
-  badge?: string;
 }) {
   return (
-    <Link
-      href={props.href}
-      className="group relative flex min-h-[80px] items-center gap-4 rounded-2xl border-2 border-brand-green/15 bg-white p-4 transition-all hover:border-brand-green hover:shadow-md"
-    >
-      <span className="text-3xl" aria-hidden>
-        {props.emoji}
-      </span>
-      <div className="flex-1">
-        <h2 className="flex items-center gap-2 text-lg font-bold text-text-primary group-hover:text-brand-green">
-          {props.title}
-          {props.badge && (
-            <span className="rounded-full bg-brand-green px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-              {props.badge}
-            </span>
-          )}
-        </h2>
-        <p className="text-sm text-text-secondary">{props.subtitle}</p>
+    <Link href={props.href} className="strata-big-btn group">
+      <div className="flex items-center justify-between">
+        <span className="micro text-solo-tinta-tenue">{props.label}</span>
+        <span className="text-jazida-verde">
+          <Icon name={props.icon} size={22} />
+        </span>
       </div>
-      <span className="text-2xl text-brand-green">→</span>
+      <h2 className="display-s text-solo-tinta" style={{ fontSize: 22 }}>
+        {props.title}
+      </h2>
+      <div className="h-px w-8 bg-solo-linha" />
+      <p className="body-s text-solo-tinta-suave">{props.subtitle}</p>
+      <div className="mt-auto flex items-center justify-end gap-1.5 text-jazida-verde">
+        <span className="text-[13px] font-medium">Continuar</span>
+        <Icon name="i-arr" size={14} />
+      </div>
     </Link>
   );
 }

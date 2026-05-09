@@ -1,25 +1,23 @@
 "use client";
 
-// ProtocolBadge — destaque visual pro numero de protocolo (ex: JZD-2026-00123).
+// ProtocolBadge Strata — borda dupla cor ferro, mono grande no centro.
 import { motion } from "framer-motion";
 
 export function ProtocolBadge({ protocol }: { protocol: string }) {
   return (
     <motion.div
-      initial={{ scale: 0.9, opacity: 0 }}
+      initial={{ scale: 0.95, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 220, damping: 18 }}
-      className="flex flex-col items-center gap-1 rounded-2xl border-2 border-brand-green bg-white px-6 py-4 shadow-sm"
+      transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}
+      className="strata-proto"
     >
-      <span className="text-xs uppercase tracking-wider text-text-secondary">
-        Seu protocolo
-      </span>
-      <span className="font-mono text-2xl font-bold text-brand-green">
-        {protocol}
-      </span>
-      <span className="text-xs text-text-secondary">
-        guarda isso, viu? e a tua prova
-      </span>
+      <p className="micro" style={{ color: "var(--ferro)" }}>
+        § Protocolo
+      </p>
+      <p className="mono-l mt-3 text-jazida-verde">{protocol}</p>
+      <p className="body-s mt-3 text-solo-tinta-suave">
+        guarde esse numero. e sua prova.
+      </p>
     </motion.div>
   );
 }

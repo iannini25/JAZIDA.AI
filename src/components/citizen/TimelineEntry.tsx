@@ -1,10 +1,12 @@
 "use client";
 
-// TimelineEntry — uma entrada no historico do cidadao.
+// TimelineEntry Strata — linha de revista. Hairline divider + icone monoline +
+// data em mono + chip de status.
 
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { HistoryItem } from "@/types";
+import { Icon, type IconName } from "@/components/ui/Icons";
 import { cn } from "@/lib/utils";
 
 export type TimelineEntryProps = { entry: HistoryItem };
@@ -16,63 +18,6 @@ export function TimelineEntry({ entry }: TimelineEntryProps) {
   return <ReplicaItem replica={entry.data} />;
 }
 
-function IdeaItem({
-  idea,
-}: {
-  idea: Extract<HistoryItem, { kind: "idea" }>["data"];
-}) {
-  const verdictMeta: Record<
-    typeof idea.verdict.level,
-    { emoji: string; chip: string }
-  > = {
-    go: { emoji: "🟢", chip: "bg-emerald-100 text-emerald-800" },
-    adjust: { emoji: "🟡", chip: "bg-amber-100 text-amber-800" },
-    pivot: { emoji: "🔴", chip: "bg-red-100 text-red-800" },
-  };
-  const meta = verdictMeta[idea.verdict.level];
-  return (
-    <article className="rounded-2xl border border-gray-200 bg-white p-4">
-      <header className="flex items-center justify-between gap-2 text-xs text-text-secondary">
-        <span className="flex items-center gap-2">
-          <span className="text-base" aria-hidden>
-            💡
-          </span>
-          <span>Ideia · {dateLabel(idea.createdAt)}</span>
-        </span>
-        <span
-          className={cn(
-            "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
-            meta.chip
-          )}
-        >
-          {meta.emoji} {idea.verdict.score}/100
-        </span>
-      </header>
-      <p className="mt-2 text-sm font-semibold text-text-primary">
-        {idea.structured.title}
-      </p>
-      <p className="mt-1 text-xs leading-relaxed text-text-secondary">
-        “{idea.rawInput.slice(0, 140)}{idea.rawInput.length > 140 ? "..." : ""}”
-      </p>
-      <p className="mt-2 text-xs text-text-primary">
-        {idea.verdict.headline}
-      </p>
-      <div className="mt-2 flex flex-wrap gap-2 text-xs text-text-secondary">
-        <span className="rounded-md bg-gray-100 px-2 py-0.5">
-          {idea.structured.category}
-        </span>
-        <span className="rounded-md bg-gray-100 px-2 py-0.5">
-          {idea.structured.suggestedLegalForm}
-        </span>
-        <span className="rounded-md bg-gray-100 px-2 py-0.5">
-          R$ {idea.structured.estimatedCapex.min.toLocaleString("pt-BR")}–
-          {idea.structured.estimatedCapex.max.toLocaleString("pt-BR")}
-        </span>
-      </div>
-    </article>
-  );
-}
-
 function dateLabel(iso: string): string {
   try {
     return format(new Date(iso), "dd 'de' MMM, HH:mm", { locale: ptBR });
@@ -81,34 +26,71 @@ function dateLabel(iso: string): string {
   }
 }
 
-function TalentItem({ talent }: { talent: Extract<HistoryItem, { kind: "talent" }>["data"] }) {
+function Header({
+  icon,
+  iconColor,
+  kind,
+  iso,
+  trailing,
+}: {
+  icon: IconName;
+  iconColor: string;
+  kind: string;
+  iso: string;
+  trailing?: React.ReactNode;
+}) {
+  return (
+    <header className="flex items-center gap-3">
+      <span style={{ color: iconColor }}>
+        <Icon name={icon} size={16} />
+      </span>
+      <span className="micro text-solo-tinta-tenue">{kind}</span>
+      <span className="mono-s text-solo-tinta-tenue">·</span>
+      <span className="mono-s text-solo-tinta-tenue">{dateLabel(iso)}</span>
+      {trailing && <span className="ml-auto">{trailing}</span>}
+    </header>
+  );
+}
+
+function TalentItem({
+  talent,
+}: {
+  talent: Extract<HistoryItem, { kind: "talent" }>["data"];
+}) {
   const matches = talent.matches ?? [];
   return (
-    <article className="rounded-2xl border border-gray-200 bg-white p-4">
-      <header className="flex items-center gap-2 text-xs text-text-secondary">
-        <span className="text-base" aria-hidden>
-          🎯
-        </span>
-        <span>Talento · {dateLabel(talent.createdAt)}</span>
-      </header>
-      <p className="mt-2 text-sm leading-relaxed text-text-primary">
+    <article className="rounded-[10px] border border-solo-linha bg-solo-papel-claro p-4">
+      <Header
+        icon="i-mira"
+        iconColor="var(--jazida-verde)"
+        kind="§ talento"
+        iso={talent.createdAt}
+      />
+      <p className="body-strata mt-3 italic text-solo-tinta-suave">
         “{talent.rawInput}”
       </p>
       {talent.structured?.label && (
-        <p className="mt-2 text-xs uppercase tracking-wide text-text-secondary">
+        <p className="caption mt-2 text-solo-tinta-tenue">
           tema: {talent.structured.label} · {talent.structured.category}
         </p>
       )}
       {matches.length > 0 && (
-        <div className="mt-3 rounded-xl bg-brand-green-light/10 p-3">
-          <p className="text-xs font-semibold text-brand-green">
-            Bussola achou {matches.length} caminhos pra voce:
+        <div className="mt-3 border-t border-solo-linha pt-3">
+          <p className="micro text-jazida-verde">
+            Bussola achou {matches.length} caminhos
           </p>
-          <ul className="mt-1 space-y-1 text-sm text-text-primary">
+          <ul className="mt-2 space-y-1 body-s text-solo-tinta">
             {matches.slice(0, 3).map((m, i) => (
-              <li key={i}>
-                · <span className="font-medium">{m.title}</span>
-                {m.cost ? ` — ${m.cost}` : ""}
+              <li key={i} className="flex gap-2">
+                <span className="mono-s text-solo-tinta-tenue">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span>
+                  <span className="font-medium">{m.title}</span>
+                  {m.cost ? (
+                    <span className="text-solo-tinta-tenue"> — {m.cost}</span>
+                  ) : null}
+                </span>
               </li>
             ))}
           </ul>
@@ -118,6 +100,24 @@ function TalentItem({ talent }: { talent: Extract<HistoryItem, { kind: "talent" 
   );
 }
 
+const STATUS_INFO: Record<
+  "open" | "in_progress" | "resolved",
+  { label: string; chipClass: string }
+> = {
+  open: {
+    label: "em analise",
+    chipClass: "border-[rgba(201,133,58,0.4)] text-sinal-alerta bg-[rgba(201,133,58,0.08)]",
+  },
+  in_progress: {
+    label: "em andamento",
+    chipClass: "border-[rgba(61,111,143,0.4)] text-sinal-info bg-[rgba(61,111,143,0.08)]",
+  },
+  resolved: {
+    label: "resolvido",
+    chipClass: "border-[rgba(63,128,96,0.4)] text-jazida-verde bg-jazida-verde/10",
+  },
+};
+
 function ComplaintItem({
   complaint,
 }: {
@@ -126,52 +126,77 @@ function ComplaintItem({
   const isSuggestion = complaint.type === "suggestion";
   const statusInfo = STATUS_INFO[complaint.status];
   return (
-    <article className="rounded-2xl border border-gray-200 bg-white p-4">
-      <header className="flex items-center justify-between gap-2 text-xs text-text-secondary">
-        <span className="flex items-center gap-2">
-          <span className="text-base" aria-hidden>
-            {isSuggestion ? "💡" : "📢"}
+    <article className="rounded-[10px] border border-solo-linha bg-solo-papel-claro p-4">
+      <Header
+        icon={isSuggestion ? "i-cris" : "i-meg"}
+        iconColor={isSuggestion ? "var(--jazida-verde)" : "var(--ferro)"}
+        kind={isSuggestion ? "§ sugestao" : "§ reclamacao"}
+        iso={complaint.createdAt}
+        trailing={
+          <span
+            className={cn(
+              "strata-chip",
+              statusInfo.chipClass
+            )}
+          >
+            [{statusInfo.label}]
           </span>
-          <span>
-            {isSuggestion ? "Sugestao" : "Queixa"} · {dateLabel(complaint.createdAt)}
-          </span>
-        </span>
-        <span
-          className={cn(
-            "rounded-full px-2 py-0.5 text-xs font-semibold",
-            statusInfo.chipClass
-          )}
-        >
-          {statusInfo.label}
-        </span>
-      </header>
-      <p className="mt-2 text-sm leading-relaxed text-text-primary">
+        }
+      />
+      <p className="body-strata mt-3 italic text-solo-tinta-suave">
         “{complaint.rawInput}”
       </p>
-      <div className="mt-2 flex flex-wrap gap-2 text-xs text-text-secondary">
-        <span className="rounded-md bg-gray-100 px-2 py-0.5">
-          {complaint.classification.category}
-        </span>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <span className="strata-chip">{complaint.classification.category}</span>
         {complaint.classification.neighborhood && (
-          <span className="rounded-md bg-gray-100 px-2 py-0.5">
+          <span className="strata-chip">
             {complaint.classification.neighborhood}
           </span>
         )}
-        <span className="rounded-md bg-gray-100 px-2 py-0.5">
+        <span className="strata-chip">
           urgencia {complaint.classification.urgency}
         </span>
       </div>
-      <p className="mt-2 font-mono text-xs text-text-secondary">
+      <p className="mono-s mt-3 text-solo-tinta-tenue">
         protocolo {complaint.protocolNumber}
       </p>
       {complaint.resolvedAction && (
-        <div className="mt-3 rounded-xl bg-brand-green-light/10 p-3 text-sm text-text-primary">
-          <p className="text-xs font-semibold text-brand-green">
-            Resposta da Vale:
-          </p>
-          <p className="mt-1">{complaint.resolvedAction}</p>
+        <div className="mt-3 border-l-2 border-jazida-verde bg-jazida-verde/5 p-3">
+          <p className="micro text-jazida-verde">Resposta da Vale</p>
+          <p className="body-s mt-1 text-solo-tinta">{complaint.resolvedAction}</p>
         </div>
       )}
+    </article>
+  );
+}
+
+function IdeaItem({
+  idea,
+}: {
+  idea: Extract<HistoryItem, { kind: "idea" }>["data"];
+}) {
+  // Strata: nao mostramos veredito/score/plano pro cidadao.
+  // Apenas confirmamos que recebemos e estamos analisando.
+  return (
+    <article className="rounded-[10px] border border-solo-linha bg-solo-papel-claro p-4">
+      <Header
+        icon="i-broto"
+        iconColor="var(--jazida-verde-vivo)"
+        kind="§ ideia"
+        iso={idea.createdAt}
+        trailing={
+          <span className="strata-chip border-[rgba(63,128,96,0.4)] bg-jazida-verde/10 text-jazida-verde">
+            [em analise]
+          </span>
+        }
+      />
+      <p className="body-strata mt-3 italic text-solo-tinta-suave">
+        “{idea.rawInput}”
+      </p>
+      <p className="caption mt-3 text-solo-tinta-tenue">
+        sua ideia foi recebida. equipe de investimento social vai analisar e te
+        retornar com proximos passos.
+      </p>
     </article>
   );
 }
@@ -182,31 +207,14 @@ function ReplicaItem({
   replica: Extract<HistoryItem, { kind: "replica" }>["data"];
 }) {
   return (
-    <article className="rounded-2xl border border-brand-green-light bg-brand-green-light/10 p-4">
-      <header className="flex items-center gap-2 text-xs text-brand-green">
-        <span className="text-base" aria-hidden>
-          💬
-        </span>
-        <span>Mensagem da Vale · {dateLabel(replica.createdAt)}</span>
-      </header>
-      <p className="mt-2 text-sm leading-relaxed text-text-primary">
-        {replica.message}
-      </p>
+    <article className="rounded-[10px] border-l-2 border-jazida-verde bg-jazida-verde/5 p-4">
+      <Header
+        icon="i-balao"
+        iconColor="var(--jazida-verde)"
+        kind="§ resposta da Vale"
+        iso={replica.createdAt}
+      />
+      <p className="body-strata mt-3 text-solo-tinta">{replica.message}</p>
     </article>
   );
 }
-
-const STATUS_INFO: Record<
-  "open" | "in_progress" | "resolved",
-  { label: string; chipClass: string }
-> = {
-  open: { label: "🟡 em analise", chipClass: "bg-amber-100 text-amber-800" },
-  in_progress: {
-    label: "🔵 em andamento",
-    chipClass: "bg-blue-100 text-blue-800",
-  },
-  resolved: {
-    label: "🟢 resolvido",
-    chipClass: "bg-emerald-100 text-emerald-800",
-  },
-};

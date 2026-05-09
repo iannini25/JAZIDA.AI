@@ -1,46 +1,37 @@
 "use client";
 
-// /app/empreender — cidadao manda ideia de negocio. Agente Semente avalia.
+// /app/empreender — Sistema Strata. UX REVISTA:
 //
-// Fluxo:
-//  1) form com textarea + CTA "Analisar minha ideia"
-//  2) submit -> POST /ideas -> mostra <AgentCascade> animando ~5-7s
-//  3) tela de veredito com <IdeaVerdictBadge> + dimensoes + plano + financiamento
+// Cidadao envia ideia de negocio. Agente Semente AINDA roda no backend
+// (analisa, classifica, aterriza no dashboard). MAS o cidadao NAO recebe
+// veredito, score ou plano. Ele recebe apenas a confirmacao de que a ideia
+// foi recebida e que a equipe de investimento social vai analisar e responder.
+//
+// Justificativa: a analise e produto pra mineradora (relatorio, alocacao
+// ESG, just transition). Pro cidadao, a entrega e simples e digna:
+// "recebemos. vamos olhar. te chamamos no whatsapp."
 
-import { Suspense, useEffect, useMemo, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { AgentCascade } from "@/components/citizen/AgentCascade";
 import { AppHeader } from "@/components/citizen/AppHeader";
-import { IdeaVerdictBadge } from "@/components/citizen/IdeaVerdictBadge";
-import { MarketDimensionRow } from "@/components/citizen/MarketDimensionRow";
-import { NextStepCard } from "@/components/citizen/NextStepCard";
-import { FundingOpportunityCard } from "@/components/citizen/FundingOpportunityCard";
-import {
-  listCitizens,
-  seedDemo,
-  submitBusinessIdea,
-} from "@/lib/api/citizen";
-import {
-  getStoredCitizenId,
-  getStoredCitizenName,
-  setStoredCitizen,
-} from "@/lib/citizen-storage";
-import type { BusinessIdea } from "@/types";
+import { Icon } from "@/components/ui/Icons";
+import { submitBusinessIdea } from "@/lib/api/citizen";
+import { getStoredAuth } from "@/lib/auth-storage";
+import { getStoredCitizenId } from "@/lib/citizen-storage";
 
 const PLACEHOLDER = `ex: queria abrir uma padaria perto de casa, sei fazer pao
 ex: tava pensando em vender vestido de noiva, sei costurar
 ex: quero montar uma marmitaria pra trabalhador da Vale`;
 
 const CASCADE_STEPS = [
-  { agent: "Acolhida", description: "te ouvindo" },
-  { agent: "Semente · demanda", description: "cruzando sinais da cidade" },
-  { agent: "Semente · competicao", description: "vendo quem ja faz isso aqui" },
-  { agent: "Semente · plano", description: "montando seu plano de acao" },
+  { agent: "Acolhida", description: "ouvindo sua ideia" },
+  { agent: "Semente", description: "registrando no canal de investimento" },
 ];
 
-type ViewState = "form" | "processing" | "result" | "error";
+type ViewState = "form" | "processing" | "received" | "error";
 
 export default function EmpreenderPageWrapper() {
   return (
@@ -52,7 +43,7 @@ export default function EmpreenderPageWrapper() {
 
 function EmpreenderLoading() {
   return (
-    <main className="flex flex-1 items-center justify-center px-5 py-10 text-sm text-text-secondary">
+    <main className="flex flex-1 items-center justify-center px-5 py-10 mono-s text-solo-tinta-tenue">
       carregando...
     </main>
   );
@@ -67,64 +58,37 @@ function EmpreenderPage() {
   const [citizenName, setCitizenName] = useState<string>("");
   const [text, setText] = useState<string>(prefill);
   const [view, setView] = useState<ViewState>("form");
-  const [idea, setIdea] = useState<BusinessIdea | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
   useEffect(() => {
-    let cancelled = false;
-    async function boot() {
-      const stored = getStoredCitizenId();
-      if (stored) {
-        if (!cancelled) {
-          setCitizenId(stored);
-          setCitizenName(getStoredCitizenName() || "");
-        }
-        return;
-      }
-      try {
-        await seedDemo();
-        const { citizens } = await listCitizens();
-        const target =
-          citizens.find((c) => c.name.toLowerCase().includes("beatriz")) ||
-          citizens.find((c) => c.name.toLowerCase().includes("maria")) ||
-          citizens[0];
-        if (target) {
-          setStoredCitizen(target.id, target.name);
-          if (!cancelled) {
-            setCitizenId(target.id);
-            setCitizenName(target.name.split(" ")[0]);
-          }
-        }
-      } catch (err) {
-        console.error("[empreender] bootstrap falhou:", err);
-      }
+    const auth = getStoredAuth();
+    if (!auth) {
+      router.replace("/");
+      return;
     }
-    void boot();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const greeting = useMemo(
-    () =>
-      citizenName ? `${citizenName}, conta a ideia.` : "Conta a ideia.",
-    [citizenName]
-  );
+    if (auth.citizenId) {
+      setCitizenId(auth.citizenId);
+    } else {
+      const stored = getStoredCitizenId();
+      if (stored) setCitizenId(stored);
+    }
+    setCitizenName(auth.displayName.split(" ")[0] || "");
+  }, [router]);
 
   async function handleSubmit() {
     const trimmed = text.trim();
     if (!trimmed || !citizenId) return;
     setView("processing");
-    setIdea(null);
     setErrorMessage("");
     try {
-      // Roda em paralelo: submit + delay minimo de 4s pra cascata terminar
-      const [submitRes] = await Promise.all([
+      // O agente Semente roda no backend. O retorno completo (score, plano,
+      // financiamento) NAO e mostrado aqui — vai pro dashboard da mineradora.
+      const [_submitRes] = await Promise.all([
         submitBusinessIdea(citizenId, trimmed),
-        new Promise((r) => setTimeout(r, 4500)),
+        new Promise((r) => setTimeout(r, 2400)),
       ]);
-      setIdea(submitRes.idea);
-      setView("result");
+      void _submitRes;
+      setView("received");
     } catch (err) {
       console.error("[empreender] erro:", err);
       setErrorMessage(
@@ -138,11 +102,11 @@ function EmpreenderPage() {
 
   return (
     <>
-      <AppHeader title="Empreender" back="/app" />
-      <main className="flex flex-1 flex-col gap-6 px-5 py-6 pb-24">
+      <AppHeader title="empreender" back="/app" />
+      <main className="flex flex-1 flex-col gap-8 px-6 py-8 pb-20">
         {view === "form" && (
           <FormView
-            greeting={greeting}
+            citizenName={citizenName}
             text={text}
             setText={setText}
             onSubmit={handleSubmit}
@@ -150,17 +114,15 @@ function EmpreenderPage() {
           />
         )}
 
-        {view === "processing" && (
-          <ProcessingView text={text} />
-        )}
+        {view === "processing" && <ProcessingView text={text} />}
 
-        {view === "result" && idea && (
-          <ResultView
-            idea={idea}
+        {view === "received" && (
+          <ReceivedView
+            citizenName={citizenName}
+            text={text}
             onSeeHistory={() => router.push("/app/historia")}
             onAnother={() => {
               setText("");
-              setIdea(null);
               setView("form");
             }}
           />
@@ -168,14 +130,12 @@ function EmpreenderPage() {
 
         {view === "error" && (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-            <span className="text-4xl" aria-hidden>
-              🤔
-            </span>
-            <p className="text-base text-text-primary">{errorMessage}</p>
+            <Icon name="i-vacuo" size={32} className="text-solo-tinta-tenue" />
+            <p className="body-l text-solo-tinta">{errorMessage}</p>
             <button
               type="button"
               onClick={() => setView("form")}
-              className="rounded-2xl bg-brand-green px-5 py-3 text-sm font-semibold text-white"
+              className="strata-btn strata-btn-primary strata-btn-lg"
             >
               Tentar de novo
             </button>
@@ -187,7 +147,7 @@ function EmpreenderPage() {
 }
 
 function FormView(props: {
-  greeting: string;
+  citizenName: string;
   text: string;
   setText: (s: string) => void;
   onSubmit: () => void;
@@ -196,18 +156,20 @@ function FormView(props: {
   return (
     <>
       <div>
-        <p className="text-sm uppercase tracking-wider text-brand-green">
-          {props.greeting}
+        <p className="micro" style={{ color: "var(--ferro)" }}>
+          § Empreender · canal direto com a Vale
         </p>
         <h1
-          className="mt-1 text-2xl font-bold leading-tight text-text-primary"
-          style={{ fontFamily: "var(--font-display)" }}
+          className="display-l mt-3 text-solo-tinta"
+          style={{ fontSize: 32 }}
         >
-          💡 Sua ideia de negocio
+          {props.citizenName
+            ? `${props.citizenName}, conta a ideia.`
+            : "Conta a ideia."}
         </h1>
-        <p className="mt-2 text-sm text-text-secondary">
-          A JAZIDA vai analisar se tem mercado, sem enrolacao. Demanda real da
-          cidade, competicao, plano de acao.
+        <p className="body-l mt-3 text-solo-tinta-suave">
+          A equipe de investimento social vai analisar e te retornar pelo
+          whatsapp. Sem julgamento, sem nota.
         </p>
       </div>
 
@@ -215,8 +177,9 @@ function FormView(props: {
         value={props.text}
         onChange={(e) => props.setText(e.target.value)}
         placeholder={PLACEHOLDER}
-        rows={6}
-        className="w-full resize-none rounded-2xl border border-gray-200 bg-white p-4 text-base text-text-primary placeholder:text-text-secondary focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/30"
+        rows={7}
+        className="strata-input"
+        style={{ resize: "none", padding: 16 }}
       />
 
       <div className="grid grid-cols-1 gap-3">
@@ -224,24 +187,27 @@ function FormView(props: {
           type="button"
           disabled
           aria-disabled
-          className="flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold text-text-secondary opacity-60"
+          className="strata-btn strata-btn-outline-solo strata-btn-lg justify-center"
+          style={{ opacity: 0.55 }}
           title="Em breve — gravar audio"
         >
-          🎤 Mandar por voz
+          <Icon name="i-mic" size={16} />
+          Mandar por voz
         </button>
         <button
           type="button"
           onClick={props.onSubmit}
           disabled={props.disabled}
-          className="flex min-h-[56px] items-center justify-center gap-2 rounded-2xl bg-brand-green px-4 text-base font-semibold text-white transition-transform active:scale-[0.98] disabled:opacity-50"
+          className="strata-btn strata-btn-primary strata-btn-lg justify-center"
         >
-          📊 Analisar minha ideia
+          <Icon name="i-pena" size={16} />
+          Enviar minha ideia
         </button>
       </div>
 
       <Link
         href="/app"
-        className="self-center text-sm text-text-secondary underline-offset-2 hover:underline"
+        className="self-center body-s text-solo-tinta-tenue underline-offset-2 hover:underline"
       >
         voltar pra inicio
       </Link>
@@ -253,16 +219,16 @@ function ProcessingView({ text }: { text: string }) {
   return (
     <>
       <div>
-        <p className="text-xs uppercase tracking-wider text-brand-green">
-          JAZIDA ta analisando
+        <p className="micro" style={{ color: "var(--ferro)" }}>
+          § Registrando ideia
         </p>
         <h2
-          className="mt-1 text-xl font-bold text-text-primary"
-          style={{ fontFamily: "var(--font-display)" }}
+          className="display-l mt-3 text-solo-tinta"
+          style={{ fontSize: 26 }}
         >
-          Cruzando dados da cidade...
+          So um instante...
         </h2>
-        <blockquote className="mt-3 rounded-2xl bg-brand-bg p-4 text-sm italic text-text-primary">
+        <blockquote className="surface-solo mt-4 p-4 body-strata italic text-solo-tinta-suave">
           “{text}”
         </blockquote>
       </div>
@@ -271,133 +237,81 @@ function ProcessingView({ text }: { text: string }) {
   );
 }
 
-function ResultView(props: {
-  idea: BusinessIdea;
+function ReceivedView(props: {
+  citizenName: string;
+  text: string;
   onSeeHistory: () => void;
   onAnother: () => void;
 }) {
-  const { idea } = props;
-  const m = idea.marketAnalysis;
-
-  const demandIntent = m.demandSignal.score >= 70 ? "good" : m.demandSignal.score >= 40 ? "neutral" : "warn";
-  const competitionScore =
-    m.competitionLevel === "none"
-      ? 95
-      : m.competitionLevel === "low"
-        ? 75
-        : m.competitionLevel === "medium"
-          ? 45
-          : 15;
-  const competitionIntent =
-    m.competitionLevel === "none" || m.competitionLevel === "low"
-      ? "good"
-      : m.competitionLevel === "saturated"
-        ? "warn"
-        : "neutral";
-
-  const capexLabel = `R$ ${idea.structured.estimatedCapex.min.toLocaleString("pt-BR")}–${idea.structured.estimatedCapex.max.toLocaleString("pt-BR")}`;
-  const paybackLabel = `${idea.structured.estimatedPaybackMonths} meses`;
-
   return (
     <>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
       >
-        <p className="text-xs uppercase tracking-wider text-brand-green">
-          Sua ideia
+        <p className="micro" style={{ color: "var(--ferro)" }}>
+          § Recebido
         </p>
         <h2
-          className="mt-1 text-xl font-bold leading-tight text-text-primary"
-          style={{ fontFamily: "var(--font-display)" }}
+          className="display-l mt-3 text-solo-tinta"
+          style={{ fontSize: 28 }}
         >
-          “{idea.structured.title}”
+          {props.citizenName
+            ? `${props.citizenName}, sua ideia foi registrada.`
+            : "Sua ideia foi registrada."}
         </h2>
-        <p className="mt-1 text-xs text-text-secondary">
-          {idea.structured.category} · {idea.structured.suggestedLegalForm} ·{" "}
-          {idea.structured.targetCustomer}
+        <p className="body-l mt-3 text-solo-tinta-suave">
+          A equipe de investimento social da Vale vai analisar e cruzar com
+          dados da cidade — demanda local, programas de financiamento, talentos
+          disponiveis. Quando terminarem, te chamam no whatsapp com o retorno
+          completo.
         </p>
       </motion.div>
 
-      <IdeaVerdictBadge
-        level={idea.verdict.level}
-        score={idea.verdict.score}
-        headline={idea.verdict.headline}
-      />
+      <div className="surface-solo p-5">
+        <p className="micro" style={{ color: "var(--solo-tinta-tenue)" }}>
+          O que voce mandou
+        </p>
+        <p className="body-strata mt-3 italic text-solo-tinta">
+          “{props.text}”
+        </p>
+      </div>
 
-      <p className="rounded-xl bg-brand-bg p-4 text-sm leading-relaxed text-text-primary">
-        {idea.verdict.reasoning}
-      </p>
-
-      <section className="flex flex-col gap-3">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">
-          Por que vale (ou nao)
-        </h3>
-        <MarketDimensionRow
-          icon="📈"
-          label="Demanda"
-          score={m.demandSignal.score}
-          evidence={m.demandSignal.evidence}
-          intent={demandIntent}
-        />
-        <MarketDimensionRow
-          icon="🏪"
-          label="Competicao"
-          score={competitionScore}
-          scoreLabel={competitionLabel(m.competitionLevel)}
-          evidence={m.competitionEvidence}
-          intent={competitionIntent}
-        />
-        <MarketDimensionRow
-          icon="💰"
-          label="Investimento"
-          scoreLabel={capexLabel}
-          evidence={`Volta em ${paybackLabel} (estimativa). Forma juridica sugerida: ${idea.structured.suggestedLegalForm}.`}
-          intent="neutral"
-        />
-        {m.localContentMatch?.potential && (
-          <MarketDimensionRow
-            icon="🏗️"
-            label="Local Content"
-            scoreLabel="match alto"
-            evidence={m.localContentMatch.description}
-            intent="good"
+      <div className="surface-solo border-l-2 border-l-jazida-verde p-5">
+        <p className="micro text-jazida-verde">§ Proximos passos</p>
+        <ol className="mt-3 flex flex-col gap-3">
+          <Step
+            order="01"
+            title="Sua ideia entra na fila de analise"
+            note="prazo medio: 5 dias uteis"
           />
-        )}
-      </section>
-
-      <section className="flex flex-col gap-3">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">
-          Seus proximos {idea.actionPlan.nextSteps.length} passos
-        </h3>
-        {idea.actionPlan.nextSteps.map((s, i) => (
-          <NextStepCard key={s.order} step={s} index={i} />
-        ))}
-      </section>
-
-      {idea.actionPlan.fundingOpportunities.length > 0 && (
-        <section className="flex flex-col gap-3">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">
-            Programas que cabem em voce
-          </h3>
-          {idea.actionPlan.fundingOpportunities.map((f, i) => (
-            <FundingOpportunityCard key={i} funding={f} />
-          ))}
-        </section>
-      )}
+          <Step
+            order="02"
+            title="Equipe ESG cruza com dados da cidade"
+            note="demanda real, competicao, programas de financiamento"
+          />
+          <Step
+            order="03"
+            title="Voce recebe retorno por whatsapp"
+            note="proximos passos concretos: MEI, Sebrae, capital semente, parcerias"
+          />
+        </ol>
+      </div>
 
       <div className="mt-2 flex flex-col gap-2">
         <button
           type="button"
           onClick={props.onSeeHistory}
-          className="flex min-h-[52px] items-center justify-center rounded-2xl bg-brand-green text-base font-semibold text-white"
+          className="strata-btn strata-btn-primary strata-btn-lg justify-center"
         >
-          Quero seguir esse plano!
+          Ver minha historia
+          <Icon name="i-arr" size={14} />
         </button>
         <button
           type="button"
           onClick={props.onAnother}
-          className="text-sm text-text-secondary underline-offset-2 hover:underline"
+          className="body-s text-solo-tinta-tenue underline-offset-2 hover:underline"
         >
           mandar outra ideia
         </button>
@@ -406,15 +320,22 @@ function ResultView(props: {
   );
 }
 
-function competitionLabel(level: BusinessIdea["marketAnalysis"]["competitionLevel"]): string {
-  switch (level) {
-    case "none":
-      return "nenhuma";
-    case "low":
-      return "baixa";
-    case "medium":
-      return "media";
-    case "saturated":
-      return "saturada";
-  }
+function Step({
+  order,
+  title,
+  note,
+}: {
+  order: string;
+  title: string;
+  note: string;
+}) {
+  return (
+    <li className="flex gap-3">
+      <span className="mono-s text-solo-tinta-tenue">{order}</span>
+      <div>
+        <p className="body-strata font-medium text-solo-tinta">{title}</p>
+        <p className="caption text-solo-tinta-tenue">{note}</p>
+      </div>
+    </li>
+  );
 }

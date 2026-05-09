@@ -1,9 +1,10 @@
 "use client";
 
-// DashboardHeader — top bar executiva. Mostra mineradora/cidade + sentimento atual + relogio live.
+// DashboardHeader Strata — top bar Subsolo. Crumbs editorial + sentimento mono + relogio.
 
 import { useEffect, useState } from "react";
 import type { SentimentSnapshot } from "@/types";
+import { Icon } from "@/components/ui/Icons";
 
 export function DashboardHeader({
   miner,
@@ -23,47 +24,56 @@ export function DashboardHeader({
   }, []);
 
   const value = sentiment?.current ?? 0;
-  const display =
-    value > 0 ? `+${value.toFixed(2)}` : value.toFixed(2);
+  const display = value > 0 ? `+${value.toFixed(2)}` : value.toFixed(2);
   const trendSymbol =
     sentiment?.trend === "up" ? "↑" : sentiment?.trend === "down" ? "↓" : "→";
+  const sentimentColor =
+    value > 0.3
+      ? "var(--jazida-verde-vivo)"
+      : value < -0.3
+        ? "var(--sinal-critico)"
+        : "var(--sinal-atencao)";
 
   return (
-    <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-gray-200 bg-white px-6 py-4">
-      <div>
-        <p className="text-[10px] uppercase tracking-widest text-text-secondary">
-          JAZIDA · {miner}
-        </p>
-        <h1 className="text-lg font-bold text-text-primary">
-          {cityLabel}
-        </h1>
-      </div>
-
-      {sentiment && (
-        <div className="flex items-baseline gap-2 border-l border-gray-200 px-6">
-          <span className="text-[10px] uppercase tracking-widest text-text-secondary">
-            sentimento
-          </span>
-          <span
-            className="font-mono text-2xl font-bold tabular-nums"
-            style={{ color: colorFor(value) }}
-          >
-            {display}
-          </span>
-          <span className="text-sm text-text-secondary">{trendSymbol}</span>
+    <header className="border-b border-subsolo-linha-forte bg-subsolo-tinta">
+      {/* topbar com breadcrumbs */}
+      <div className="flex h-14 items-center gap-4 px-8">
+        <div className="mono-s text-subsolo-osso-tenue flex items-center gap-2">
+          <span>operacao</span>
+          <Icon name="i-chev" size={11} />
+          <span>{cityLabel.toLowerCase()}</span>
+          <Icon name="i-chev" size={11} />
+          <span className="text-subsolo-osso">visao geral</span>
         </div>
-      )}
-
-      <div className="flex items-baseline gap-2 border-l border-gray-200 px-6">
-        <span className="text-[10px] uppercase tracking-widest text-text-secondary">
-          atualizado
-        </span>
-        <span className="font-mono text-sm tabular-nums text-text-primary">
-          {now}
-        </span>
+        {rightSlot && <div className="ml-auto">{rightSlot}</div>}
       </div>
 
-      {rightSlot && <div className="ml-auto">{rightSlot}</div>}
+      {/* hero do header */}
+      <div className="flex flex-wrap items-center gap-x-8 gap-y-3 px-8 py-5">
+        <div>
+          <p className="micro text-ferro">
+            JAZIDA · {miner}
+          </p>
+          <h1 className="display-m mt-1 text-subsolo-osso" style={{ fontSize: 22 }}>
+            {cityLabel}
+          </h1>
+        </div>
+
+        {sentiment && (
+          <div className="flex items-baseline gap-2 border-l border-subsolo-linha-forte pl-8">
+            <span className="micro text-subsolo-osso-tenue">sentimento</span>
+            <span className="mono-l" style={{ color: sentimentColor, fontSize: 22 }}>
+              {display}
+            </span>
+            <span className="body-s text-subsolo-osso-suave">{trendSymbol}</span>
+          </div>
+        )}
+
+        <div className="flex items-baseline gap-2 border-l border-subsolo-linha-forte pl-8">
+          <span className="micro text-subsolo-osso-tenue">atualizado</span>
+          <span className="mono-s text-subsolo-osso">{now}</span>
+        </div>
+      </div>
     </header>
   );
 }
@@ -73,10 +83,4 @@ function formatNow(): string {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-function colorFor(v: number): string {
-  if (v < -0.3) return "#dc2626";
-  if (v > 0.3) return "#047857";
-  return "#f59e0b";
 }

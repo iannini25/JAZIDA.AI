@@ -41,6 +41,18 @@ export async function onTalentReceived(args: {
   rawInput: string;
 }): Promise<void> {
   const { citizen, talent } = args;
+
+  // 1) Acolhida — emite evento de recebimento
+  emitAgentEvent({
+    id: newId(),
+    agentName: "Acolhida",
+    citizenId: citizen.id,
+    action: `Recebeu talento de ${citizen.name.split(" ")[0]}: "${args.rawInput.slice(0, 60)}..."`,
+    payload: { talentId: talent.id },
+    timestamp: nowIso(),
+  });
+
+  // 2) Talento — estrutura a aspiracao
   try {
     const out = await Talento.run({ rawInput: args.rawInput, citizen });
     talent.type = out.type;
@@ -48,23 +60,33 @@ export async function onTalentReceived(args: {
     saveDb();
   } catch (err) {
     console.error("[orchestrator] Talento falhou:", err);
+    emitAgentEvent({
+      id: newId(),
+      agentName: "Talento",
+      citizenId: citizen.id,
+      action: `ERRO ao estruturar talento: ${err instanceof Error ? err.message : "desconhecido"}`,
+      payload: { talentId: talent.id, error: true },
+      timestamp: nowIso(),
+    });
     return;
   }
 
-  // Bussola async (nao bloqueia o caller). Erros sao logados mas nao propagam.
-  void runBussolaAsync(citizen, talent);
-}
-
-async function runBussolaAsync(
-  citizen: Citizen,
-  talent: TalentEntry
-): Promise<void> {
+  // 3) Bussola — busca matches (roda inline, nao fire-and-forget)
   try {
     const out = await Bussola.run({ citizen, talent });
     talent.matches = out.matches;
+    talent.matchApprovalStatus = "pending"; // aguarda aprovacao no dashboard
     saveDb();
   } catch (err) {
     console.error("[orchestrator] Bussola falhou:", err);
+    emitAgentEvent({
+      id: newId(),
+      agentName: "Bussola",
+      citizenId: citizen.id,
+      action: `ERRO ao buscar matches: ${err instanceof Error ? err.message : "desconhecido"}`,
+      payload: { talentId: talent.id, error: true },
+      timestamp: nowIso(),
+    });
   }
 }
 
@@ -78,6 +100,18 @@ export async function onComplaintReceived(args: {
   photoUrl?: string;
 }): Promise<{ alert?: Alert }> {
   const { citizen, complaint } = args;
+
+  // 1) Acolhida — registra recebimento
+  emitAgentEvent({
+    id: newId(),
+    agentName: "Acolhida",
+    citizenId: citizen.id,
+    action: `Recebeu ${complaint.type === "suggestion" ? "sugestao" : "queixa"} de ${citizen.name.split(" ")[0]}: "${args.rawInput.slice(0, 60)}..."`,
+    payload: { complaintId: complaint.id },
+    timestamp: nowIso(),
+  });
+
+  // 2) Voz — classifica
   try {
     const out = await Voz.run({
       rawInput: args.rawInput,
@@ -89,6 +123,14 @@ export async function onComplaintReceived(args: {
     saveDb();
   } catch (err) {
     console.error("[orchestrator] Voz falhou:", err);
+    emitAgentEvent({
+      id: newId(),
+      agentName: "Voz",
+      citizenId: citizen.id,
+      action: `ERRO ao classificar: ${err instanceof Error ? err.message : "desconhecido"}`,
+      payload: { complaintId: complaint.id, error: true },
+      timestamp: nowIso(),
+    });
   }
 
   // Pulsar async — heuristica deterministica (nao chama LLM por padrao)

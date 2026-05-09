@@ -13,6 +13,7 @@ const KNOWN_AGENTS: AgentName[] = [
   "Replica",
   "Pulsar",
   "Pacto",
+  "Semente",
 ];
 
 export async function GET(req: Request) {
