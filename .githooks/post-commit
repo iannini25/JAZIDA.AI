@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# post-commit: sincroniza automaticamente com o remoto JAZIDA.AI no GitHub.
+# Configurado via core.hooksPath=.githooks (rastreado no repo).
+
+set -e
+
+# Evita loop se o push disparar novo commit (não deve, mas por segurança)
+if [ "$GIT_AUTOPUSH_RUNNING" = "1" ]; then
+  exit 0
+fi
+export GIT_AUTOPUSH_RUNNING=1
+
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+
+echo "[auto-sync] push $BRANCH -> origin/$BRANCH"
+if git push origin "$BRANCH"; then
+  echo "[auto-sync] OK"
+else
+  echo "[auto-sync] FALHOU — rode 'git push' manualmente ou verifique credenciais/rede." >&2
+  exit 0  # não bloqueia o commit; só avisa
+fi
