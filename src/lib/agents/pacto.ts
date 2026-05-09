@@ -260,6 +260,27 @@ function fallbackFragments(
         reference: a.id,
       })),
     },
+    {
+      section: "Just Transition",
+      framework: input.framework,
+      content: [
+        `# Just Transition — preparacao economica pos-mineracao (ICMM)`,
+        ``,
+        `Em alinhamento com o framework ICMM de **just transition**, o JAZIDA AI mapeou e estruturou aspiracoes profissionais que **nao dependem da operacao mineraria** — ${m.totalTalents} talentos cadastrados, ${m.totalMatches} oportunidades cruzadas (cursos tecnicos, MEI, vagas locais nao-mineradoras).`,
+        ``,
+        `**Indicadores chave:**`,
+        `- Diversificacao economica: cidadaos engajados em saude, comercio, arte/cultura e tecnologia.`,
+        `- Capital humano local: parcerias mapeadas com SENAI, Senac, Sebrae e Universidade Federal de Ouro Preto.`,
+        `- Empreendedorismo: trilhas MEI estruturadas para reducao de dependencia direta da mineradora.`,
+        ``,
+        `Este eixo enderaca diretamente o risco de **dependencia economica** apontado nas auditorias ICMM Performance Expectations e da CVM 59 (relato sobre transicao).`,
+      ].join("\n"),
+      evidence: [
+        { type: "metric", reference: `talentsMapped=${m.totalTalents}` },
+        { type: "metric", reference: `opportunitiesMatched=${m.totalMatches}` },
+        { type: "framework", reference: "ICMM Performance Expectations 9.4" },
+      ],
+    },
   ];
 }
 

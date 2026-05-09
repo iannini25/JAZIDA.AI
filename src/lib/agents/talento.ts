@@ -97,19 +97,52 @@ function clamp01(n: number): number {
 
 function fallback(raw: string): RawTalento {
   const lower = raw.toLowerCase();
-  // pega primeira palavra significativa
-  const word = lower.match(/[a-zçãéáíóúâêô]{4,}/)?.[0] || "talento";
+
+  // Detecta tema de carreira primeiro (palavra-chave especifica > 1a palavra).
+  // Cada par [regex, label, category] e tentado em ordem.
+  const themes: Array<[RegExp, string, string]> = [
+    [/enfermag|enferme/, "enfermagem", "saude"],
+    [/medicin|medic[oa]/, "medicina", "saude"],
+    [/farmac/, "farmacia", "saude"],
+    [/professor|magisterio|pedagog/, "magisterio", "educacao"],
+    [/program|software|desenvolved|codigo/, "programacao", "tecnologia"],
+    [/cost(ur|ureir)|bordad/, "costura e bordado", "arte/cultura"],
+    [/musica|cantor|toca instrument/, "musica", "arte/cultura"],
+    [/padaria|padeir|pao/, "padaria", "comercio"],
+    [/cozinh|gastronom|chef/, "gastronomia", "comercio"],
+    [/comerci|loja|mei|empreend/, "comercio", "comercio"],
+    [/agricult|horta|plantar/, "agricultura", "agricultura"],
+    [/construc|pedreir|obra/, "construcao", "construcao"],
+    [/seguranc/, "seguranca", "servicos"],
+    [/mineira|mineracao/, "mineracao", "tecnico"],
+  ];
+
+  let label: string | null = null;
   let category = "outro";
-  if (/enferm|saude|hospital|cuidar/.test(lower)) category = "saude";
-  else if (/cost|bord|art|musica|cultur/.test(lower)) category = "arte/cultura";
-  else if (/program|tecn|comput|software/.test(lower)) category = "tecnico";
-  else if (/cozinh|padar|comerc|vend/.test(lower)) category = "comercio";
-  else if (/escol|professor|educ/.test(lower)) category = "educacao";
+  for (const [re, l, c] of themes) {
+    if (re.test(lower)) {
+      label = l;
+      category = c;
+      break;
+    }
+  }
+  if (!label) {
+    // Sem tema reconhecido: pega palavra >= 5 letras que NAO seja stopword.
+    const stop = new Set([
+      "queria","quero","sempre","minha","minha","filha","filho","gostar",
+      "saber","conseguir","conseguie","alguma","muito","pessoa","pessoal",
+      "porque","tambem","poder","poderia","aquilo","alguem","outros",
+    ]);
+    const candidate = lower
+      .split(/[^a-zçãéáíóúâêô]+/)
+      .find((w) => w.length >= 5 && !stop.has(w));
+    label = candidate || "talento";
+  }
 
   let type: TalentType = "aspiration";
-  if (/(faco|ja sei|trabalho|sou|atuo)/.test(lower)) type = "skill";
-  else if (/(quero aprender|aprender)/.test(lower)) type = "want_to_learn";
-  else if (/(melhor|bom em|talento)/.test(lower)) type = "best_at";
+  if (/(faco|ja sei|trabalho|sou |atuo|tenho experien)/.test(lower)) type = "skill";
+  else if (/(quero aprender|gostaria de aprender|aprender)/.test(lower)) type = "want_to_learn";
+  else if (/(melhor em|bom em|sou bom|sou boa|talento)/.test(lower)) type = "best_at";
 
-  return { label: word, category, type, confidence: 0.6 };
+  return { label, category, type, confidence: 0.7 };
 }

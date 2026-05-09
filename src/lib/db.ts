@@ -126,10 +126,22 @@ export function genProtocolNumber(): string {
 }
 
 // ──────────────────────────────────────────────────────────
-// Pub/Sub para SSE
+// Pub/Sub para SSE.
+// IMPORTANTE: o Set de listeners vive em globalThis (igual ao db).
+// Se ficasse module-local, o SSE route handler e o orchestrator
+// (que dispara emit) podiam acabar com instancias diferentes do Set
+// em Next.js dev/HMR — listeners nao receberiam pushes.
 // ──────────────────────────────────────────────────────────
 type Listener = (event: AgentEvent) => void;
-const listeners = new Set<Listener>();
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __jazidaListeners: Set<Listener> | undefined;
+}
+
+const listeners: Set<Listener> =
+  globalThis.__jazidaListeners ?? new Set<Listener>();
+if (!globalThis.__jazidaListeners) globalThis.__jazidaListeners = listeners;
 
 export function subscribeAgentEvents(fn: Listener): () => void {
   listeners.add(fn);
