@@ -11,15 +11,11 @@ import { AgentCascade } from "@/components/citizen/AgentCascade";
 import { AppHeader } from "@/components/citizen/AppHeader";
 import { ProtocolBadge } from "@/components/citizen/ProtocolBadge";
 import {
-  listCitizens,
-  seedDemo,
   submitComplaint,
 } from "@/lib/api/citizen";
-import {
-  getStoredCitizenId,
-  getStoredCitizenName,
-  setStoredCitizen,
-} from "@/lib/citizen-storage";
+import { getStoredCitizenName } from "@/lib/citizen-storage";
+import { getStoredAuth } from "@/lib/auth-storage";
+import { getRateLimit } from "@/lib/api/auth";
 import type { Complaint } from "@/types";
 
 type Mode = "complaint" | "suggestion";
@@ -65,40 +61,23 @@ function VozPage() {
   const [view, setView] = useState<ViewState>("form");
   const [result, setResult] = useState<Complaint | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [remaining, setRemaining] = useState<number | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    async function boot() {
-      const stored = getStoredCitizenId();
-      if (stored) {
-        if (!cancelled) {
-          setCitizenId(stored);
-          setCitizenName(getStoredCitizenName() || "");
-        }
-        return;
-      }
-      try {
-        await seedDemo();
-        const { citizens } = await listCitizens();
-        const joao =
-          citizens.find((c) => c.name.toLowerCase().includes("joao pedro")) ||
-          citizens[0];
-        if (joao) {
-          setStoredCitizen(joao.id, joao.name);
-          if (!cancelled) {
-            setCitizenId(joao.id);
-            setCitizenName(joao.name.split(" ")[0]);
-          }
-        }
-      } catch (err) {
-        console.error("[voz] bootstrap falhou:", err);
-      }
+    const auth = getStoredAuth();
+    if (!auth) {
+      router.replace("/");
+      return;
     }
-    void boot();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    if (auth.citizenId) {
+      setCitizenId(auth.citizenId);
+    }
+    setCitizenName(auth.displayName.split(" ")[0] || getStoredCitizenName() || "");
+
+    getRateLimit("complaint").then((info) => {
+      if (info) setRemaining(info.remaining + 1);
+    }).catch(() => {});
+  }, [router]);
 
   const placeholder = useMemo(
     () => (mode === "complaint" ? PLACEHOLDER_COMPLAINT : PLACEHOLDER_SUGGESTION),
@@ -120,6 +99,10 @@ function VozPage() {
       await new Promise((r) => setTimeout(r, 1500));
       setResult(complaint);
       setView("result");
+      // Atualiza rate limit
+      getRateLimit("complaint").then((info) => {
+        if (info) setRemaining(info.remaining + 1);
+      }).catch(() => {});
     } catch (err) {
       console.error("[voz] erro:", err);
       setErrorMessage(
@@ -144,7 +127,8 @@ function VozPage() {
             setText={setText}
             placeholder={placeholder}
             onSubmit={handleSubmit}
-            disabled={!citizenId || !text.trim()}
+            disabled={!citizenId || !text.trim() || remaining === 0}
+            remaining={remaining}
           />
         )}
 
@@ -195,6 +179,7 @@ function FormView(props: {
   placeholder: string;
   onSubmit: () => void;
   disabled: boolean;
+  remaining: number | null;
 }) {
   return (
     <>
@@ -215,6 +200,12 @@ function FormView(props: {
           mineradora.
         </p>
       </div>
+
+      {props.remaining !== null && (
+        <div className="rounded-xl bg-brand-bg px-3 py-2 text-xs text-text-secondary">
+          Voce pode enviar mais <strong className="text-text-primary">{props.remaining}</strong> queixa(s)/sugestao(oes) nesta hora.
+        </div>
+      )}
 
       <div className="grid grid-cols-2 rounded-2xl bg-brand-bg p-1">
         <button

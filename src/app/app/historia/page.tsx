@@ -3,22 +3,17 @@
 // /app/historia — timeline pessoal do cidadao.
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AppHeader } from "@/components/citizen/AppHeader";
 import { TimelineEntry } from "@/components/citizen/TimelineEntry";
-import {
-  getHistory,
-  listCitizens,
-  seedDemo,
-} from "@/lib/api/citizen";
-import {
-  getStoredCitizenId,
-  getStoredCitizenName,
-  setStoredCitizen,
-} from "@/lib/citizen-storage";
+import { getHistory } from "@/lib/api/citizen";
+import { getStoredCitizenName } from "@/lib/citizen-storage";
+import { getStoredAuth } from "@/lib/auth-storage";
 import type { CitizenHistory } from "@/types";
 
 export default function HistoriaPage() {
+  const router = useRouter();
   const [history, setHistory] = useState<CitizenHistory | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,19 +22,13 @@ export default function HistoriaPage() {
     let cancelled = false;
     async function load() {
       setLoading(true);
+      const auth = getStoredAuth();
+      if (!auth) {
+        router.replace("/");
+        return;
+      }
       try {
-        let id = getStoredCitizenId();
-        if (!id) {
-          await seedDemo();
-          const { citizens } = await listCitizens();
-          const target =
-            citizens.find((c) => c.name.toLowerCase().includes("maria")) ||
-            citizens[0];
-          if (target) {
-            setStoredCitizen(target.id, target.name);
-            id = target.id;
-          }
-        }
+        const id = auth.citizenId;
         if (!id) {
           throw new Error("Cidadao nao identificado");
         }
@@ -61,7 +50,7 @@ export default function HistoriaPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [router]);
 
   const firstName =
     history?.citizen.name.split(" ")[0] || getStoredCitizenName() || "voce";

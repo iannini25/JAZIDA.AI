@@ -747,23 +747,166 @@ type ViewState = "form" | "processing" | "result" | "error";
 
 ---
 
-## 12. Endpoints da API (Referencia Rapida)
+## 12. Sistema de Autenticacao & Controle de Acesso
 
-| Metodo | Rota                                    | Superficie   |
-|--------|-----------------------------------------|--------------|
-| GET    | `/api/citizens`                         | App          |
-| POST   | `/api/citizens`                         | App          |
-| GET    | `/api/citizens/[id]`                    | App          |
-| GET    | `/api/citizens/[id]/history`            | App/Dashboard|
-| POST   | `/api/citizens/[id]/talents`            | App          |
-| GET    | `/api/citizens/[id]/talents`            | App          |
-| POST   | `/api/citizens/[id]/complaints`         | App          |
-| GET    | `/api/dashboard/sentiment`              | Dashboard    |
-| GET    | `/api/dashboard/alerts`                 | Dashboard    |
-| GET    | `/api/dashboard/agent-events`           | Dashboard    |
-| GET    | `/api/dashboard/agent-events/stream`    | Dashboard (SSE) |
-| GET    | `/api/dashboard/citizens`               | Dashboard    |
-| POST   | `/api/dashboard/replica/approve`        | Dashboard    |
-| POST   | `/api/dashboard/esg-report`             | Dashboard    |
-| POST   | `/api/demo/seed`                        | Demo         |
-| POST   | `/api/demo/trigger/[scenario]`          | Demo         |
+### 12.1 Pagina de Login (`/`)
+
+**Arquivo:** `src/app/page.tsx`
+**Funcao:** Porta de entrada do sistema — login ou registro.
+
+| Elemento              | Tipo     | Descricao                                                  |
+|-----------------------|----------|-------------------------------------------------------------|
+| Kicker                | P        | "JAZIDA AI" em brand-green uppercase                        |
+| Headline              | H1       | "Sua voz, sua cidade, suas oportunidades." font-display 3xl |
+| Tab Entrar/Criar conta| div      | Segmented control `bg-brand-bg rounded-2xl p-1`             |
+| Input usuario         | input    | `h-12 rounded-xl`, placeholder "ex: maria"                  |
+| Input senha           | input    | type=password, `h-12 rounded-xl`                            |
+| Input nome (registro) | input    | Condicional, aparece so em modo registro                    |
+| Input bairro (registro)| input   | Opcional, condicional                                       |
+| Seletor de role       | div      | 2 botoes: 🏠 Cidadao / 🏢 Funcionario, `border-2`           |
+| Erro                  | P        | `bg-red-50 text-red-800 rounded-xl p-3`                     |
+| Botao submit          | button   | "Entrar" / "Criar conta", `bg-brand-green min-h-[56px]`     |
+| Info de demo          | div      | Card com contas de demo (admin/admin123, maria/1234, etc)    |
+
+**Fluxo pos-login:**
+- `role === "cidadao"` -> redireciona para `/app`
+- `role === "funcionario"` -> redireciona para `/dashboard`
+
+**Animacao:** fade-in + slide-up no card principal
+
+### 12.2 Roles e Permissoes
+
+| Role          | Acesso                                            | Endpoints protegidos          |
+|---------------|---------------------------------------------------|-------------------------------|
+| `cidadao`     | `/app/*` (talento, voz, historia)                 | talents, complaints (com rate limit) |
+| `funcionario` | `/dashboard/*` (overview, cidadaos, ESG, alocacao)| matches approval, ESG report  |
+
+### 12.3 Contas de Demo (seed automatico)
+
+| Usuario          | Senha     | Role         | Vinculado a         |
+|------------------|-----------|--------------|---------------------|
+| admin            | admin123  | funcionario  | —                   |
+| sustentabilidade | esg2026   | funcionario  | —                   |
+| diretoria        | dir2026   | funcionario  | —                   |
+| maria            | 1234      | cidadao      | Maria Aparecida     |
+| joao             | 1234      | cidadao      | Joao Pedro Silva    |
+| ana              | 1234      | cidadao      | Ana Lucia Ferreira  |
+| carlos           | 1234      | cidadao      | Carlos Eduardo      |
+| beatriz          | 1234      | cidadao      | Beatriz Oliveira    |
+
+### 12.4 Sessao e Persistencia
+
+- Token armazenado em `localStorage` (`jazida_auth_token`)
+- Sessao expira em 24h
+- Logout disponivel no app (header) e dashboard (sidebar)
+- `Authorization: Bearer <token>` em todas as chamadas autenticadas
+
+---
+
+## 13. Rate Limiting
+
+### 13.1 Limites por Acao
+
+| Acao       | Maximo          | Janela   | Mensagem ao usuario                      |
+|------------|-----------------|----------|------------------------------------------|
+| talent     | 5 por hora      | 60 min   | "Voce pode enviar mais X talento(s)..."  |
+| complaint  | 3 por hora      | 60 min   | "Voce pode enviar mais X queixa(s)..."   |
+| idea       | 3 por hora      | 60 min   | (mesmo padrao)                           |
+
+### 13.2 UI de Rate Limit
+
+- **Indicador no form:** Banner `bg-brand-bg rounded-xl px-3 py-2 text-xs` mostrando remaining
+- **Botao desabilitado:** Quando remaining === 0, botao de submit fica `disabled:opacity-50`
+- **Erro 429:** Mensagem de erro com horario de reset
+
+---
+
+## 14. Fluxo de Aprovacao de Recomendacoes
+
+### 14.1 Fluxo
+
+```
+Cidadao envia talento
+    -> Agents processam (Acolhida -> Talento -> Bussola)
+    -> Matches gerados com matchApprovalStatus = "pending"
+    -> Cidadao ve tela "Aguardando aprovacao" (nao ve os matches)
+    -> Funcionario no Dashboard ve painel de aprovacao
+    -> Funcionario aprova/rejeita
+    -> Se aprovado, cidadao ve os matches na proxima visita
+```
+
+### 14.2 Tela "Aguardando Aprovacao" (cidadao)
+
+| Elemento         | Tipo  | Descricao                                                |
+|------------------|-------|----------------------------------------------------------|
+| Kicker           | P     | "Recebido" xs brand-green                                |
+| Titulo           | H2    | "Beleza, {nome}!" font-display xl                        |
+| Subtitulo        | P     | Explicacao de que equipe vai analisar                    |
+| Banner pendente  | div   | `border-2 border-amber-200 bg-amber-50 p-4` com ⏳       |
+| Botao historia   | button| Outlined brand-green                                     |
+| Link restart     | button| "mandar outro talento" underline                          |
+
+### 14.3 Painel de Aprovacao (dashboard)
+
+**Componente:** `src/components/dashboard/MatchApprovalPanel.tsx`
+**Localizacao:** Quadrante full-width (`xl:col-span-12`) no dashboard overview
+
+| Elemento           | Tipo    | Descricao                                              |
+|--------------------|---------|--------------------------------------------------------|
+| Header             | div     | Titulo + contadores (pendentes/aprovadas) + filtros    |
+| Filtros            | buttons | "pendentes" / "aprovadas" / "rejeitadas" / "todas"     |
+| Card por talento   | div     | Borda colorida por status (amber/emerald/red)          |
+| Info cidadao       | span    | Nome + bairro + status badge                           |
+| Raw input          | P       | Texto original do cidadao                              |
+| Classificacao      | P       | Label + categoria + confianca %                        |
+| Mini-matches       | div     | Lista compacta de matches com tipo + titulo + fit %    |
+| Botoes acao        | div     | "Aprovar" (bg-brand-green) + "Rejeitar" (border-red)   |
+| Quem aprovou       | span    | Username de quem aprovou/rejeitou                      |
+
+**Status visuais dos cards:**
+| Status   | Borda                | Fundo              | Badge                           |
+|----------|----------------------|---------------------|---------------------------------|
+| pending  | `border-amber-200`   | `bg-amber-50/50`   | `bg-amber-100 text-amber-800`   |
+| approved | `border-emerald-200` | `bg-emerald-50/30` | `bg-emerald-100 text-emerald-800`|
+| rejected | `border-red-200`     | `bg-red-50/30`     | `bg-red-100 text-red-800`       |
+
+**Polling:** Atualiza a cada 8 segundos
+
+---
+
+## 15. Botao de Logout
+
+| Superficie  | Localizacao                   | Estilo                                                |
+|-------------|-------------------------------|-------------------------------------------------------|
+| App cidadao | Header da home `/app`         | `rounded-lg border border-gray-200 px-3 py-1.5 text-xs` |
+| Dashboard   | Sidebar, abaixo de "Logado como..." | `rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold` |
+
+---
+
+## 16. Endpoints da API (Referencia Rapida)
+
+| Metodo | Rota                                    | Superficie   | Auth       |
+|--------|-----------------------------------------|--------------|------------|
+| POST   | `/api/auth/login`                       | Login        | Publico    |
+| POST   | `/api/auth/register`                    | Registro     | Publico    |
+| POST   | `/api/auth/logout`                      | Logout       | Bearer     |
+| GET    | `/api/auth/me`                          | Sessao       | Bearer     |
+| GET    | `/api/auth/rate-limit?action=X`         | Rate limit   | Bearer     |
+| GET    | `/api/citizens`                         | App          | —          |
+| POST   | `/api/citizens`                         | App          | —          |
+| GET    | `/api/citizens/[id]`                    | App          | —          |
+| GET    | `/api/citizens/[id]/history`            | App/Dashboard| —          |
+| POST   | `/api/citizens/[id]/talents`            | App          | Bearer (rate limit) |
+| GET    | `/api/citizens/[id]/talents`            | App          | —          |
+| POST   | `/api/citizens/[id]/complaints`         | App          | Bearer (rate limit) |
+| GET    | `/api/dashboard/sentiment`              | Dashboard    | —          |
+| GET    | `/api/dashboard/alerts`                 | Dashboard    | —          |
+| GET    | `/api/dashboard/agent-events`           | Dashboard    | —          |
+| GET    | `/api/dashboard/agent-events/stream`    | Dashboard (SSE) | —       |
+| GET    | `/api/dashboard/citizens`               | Dashboard    | —          |
+| GET    | `/api/dashboard/matches`                | Dashboard    | Bearer (funcionario) |
+| POST   | `/api/dashboard/matches`                | Dashboard    | Bearer (funcionario) |
+| POST   | `/api/dashboard/replica/approve`        | Dashboard    | —          |
+| POST   | `/api/dashboard/esg-report`             | Dashboard    | —          |
+| POST   | `/api/demo/seed`                        | Demo         | —          |
+| POST   | `/api/demo/trigger/[scenario]`          | Demo         | —          |
