@@ -15,17 +15,17 @@ import type { SentimentSnapshot } from "@/types";
 const DEFAULT_BUDGET = 4_000_000;
 
 const CATEGORY_LABELS: Record<string, string> = {
-  "ar/poeira": "Mitigacao de impacto ambiental",
-  "mineradora-direto": "Operacoes & engajamento direto",
-  ruido: "Mitigacao de ruido / logistica",
-  saude: "Capacitacao em saude",
-  "saude-publica": "Saude publica & infraestrutura",
-  educacao: "Educacao & ensino tecnico",
-  "educacao-publica": "Educacao publica & infraestrutura",
+  "ar/poeira": "Mitigação de impacto ambiental",
+  "mineradora-direto": "Operações & engajamento direto",
+  ruido: "Mitigação de ruído / logística",
+  saude: "Capacitação em saúde",
+  "saude-publica": "Saúde pública & infraestrutura",
+  educacao: "Educação & ensino técnico",
+  "educacao-publica": "Educação pública & infraestrutura",
   comercio: "Microempreendedorismo & MEI",
-  agua: "Saneamento & agua",
+  agua: "Saneamento & água",
   "arte/cultura": "Cultura & turismo local",
-  tecnologia: "Capacitacao em tecnologia",
+  tecnologia: "Capacitação em tecnologia",
   outro: "Programas gerais",
 };
 

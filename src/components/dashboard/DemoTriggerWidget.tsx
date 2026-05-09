@@ -26,8 +26,10 @@ export function DemoTriggerWidget() {
         await triggerDemoScenario(action);
         setLastResult(
           action === "maria_enfermagem"
-            ? "Maria enviou aspiracao"
-            : "Joao mandou queixa"
+            ? "Maria enviou aspiração"
+            : action === "beatriz_costura"
+              ? "Beatriz enviou ideia"
+              : "João mandou queixa"
         );
       }
     } catch (err) {
@@ -57,7 +59,7 @@ export function DemoTriggerWidget() {
       <div className="flex flex-col gap-1">
         <DemoButton
           label="▶ Maria pede enfermagem"
-          subtitle="Talento + Bussola + Replica"
+          subtitle="Talento + Bússola + Réplica"
           onClick={() => fire("maria_enfermagem")}
           loading={busy === "maria_enfermagem"}
         />
@@ -68,7 +70,7 @@ export function DemoTriggerWidget() {
           loading={busy === "beatriz_costura"}
         />
         <DemoButton
-          label="▶ Joao reclama de poeira"
+          label="▶ João reclama de poeira"
           subtitle="Voz + Pulsar + Vigia"
           onClick={() => fire("joaozinho_poeira")}
           loading={busy === "joaozinho_poeira"}
@@ -114,7 +116,7 @@ function DemoButton({
           : "flex flex-col items-start rounded-md bg-brand-green px-3 py-2 text-left text-white hover:bg-brand-green/90 disabled:opacity-50"
       }
     >
-      <span className="text-sm font-semibold">{loading ? "..." : label}</span>
+      <span className="text-sm font-semibold">{loading ? "…" : label}</span>
       <span className={subtle ? "text-[10px]" : "text-[10px] text-white/80"}>
         {subtitle}
       </span>

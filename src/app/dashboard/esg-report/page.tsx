@@ -31,7 +31,7 @@ export default function EsgReportPage() {
       const r = await generateEsgReport({ framework, cityId, period });
       setReport(r);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Falha ao gerar relatorio.");
+      setErr(e instanceof Error ? e.message : "Falha ao gerar relatório.");
     } finally {
       setLoading(false);
     }
@@ -44,7 +44,7 @@ export default function EsgReportPage() {
           ESG Reporting
         </p>
         <h1 className="text-lg font-bold text-text-primary">
-          Relatorio ESG completo
+          Relatório ESG completo
         </h1>
       </header>
 
@@ -124,7 +124,7 @@ export default function EsgReportPage() {
                   type="button"
                   onClick={() =>
                     alert(
-                      "PDF mockado: relatorio enviado para sustentabilidade@vale.com"
+                      "PDF mockado: relatório enviado para sustentabilidade@vale.com"
                     )
                   }
                   className="rounded-md bg-brand-green px-3 py-1 text-xs font-semibold text-white"
@@ -139,7 +139,7 @@ export default function EsgReportPage() {
 
           {!report && !loading && (
             <p className="rounded-lg border border-dashed border-gray-200 bg-white p-6 text-center text-sm text-text-secondary">
-              Selecione framework, cidade, periodo e clique em <strong>Gerar rascunho</strong>.
+              Selecione framework, cidade, período e clique em <strong>Gerar rascunho</strong>.
             </p>
           )}
         </div>

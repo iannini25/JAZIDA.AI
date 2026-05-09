@@ -30,7 +30,7 @@ export default function HistoriaPage() {
       try {
         const id = auth.citizenId;
         if (!id) {
-          throw new Error("Cidadao nao identificado");
+          throw new Error("Cidadão não identificado");
         }
         const h = await getHistory(id);
         if (!cancelled) setHistory(h);
@@ -39,7 +39,7 @@ export default function HistoriaPage() {
           setError(
             err instanceof Error
               ? err.message
-              : "Nao deu pra carregar sua historia."
+              : "Não deu pra carregar sua história."
           );
         }
       } finally {
@@ -53,11 +53,11 @@ export default function HistoriaPage() {
   }, [router]);
 
   const firstName =
-    history?.citizen.name.split(" ")[0] || getStoredCitizenName() || "voce";
+    history?.citizen.name.split(" ")[0] || getStoredCitizenName() || "você";
 
   return (
     <>
-      <AppHeader title="Sua historia" back="/app" />
+      <AppHeader title="Sua história" back="/app" />
       <main className="flex flex-1 flex-col gap-5 px-5 py-6 pb-24">
         <div>
           <p className="text-sm uppercase tracking-wider text-brand-green">
@@ -67,10 +67,10 @@ export default function HistoriaPage() {
             className="mt-1 text-2xl font-bold leading-tight text-text-primary"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            E ai, {firstName}.
+            E aí, {firstName}.
           </h1>
           <p className="mt-1 text-sm text-text-secondary">
-            Aqui ta tua historia com a Vale — tudo que voce pediu e tudo que ja
+            Aqui tá tua história com a Vale — tudo que você pediu e tudo que já
             foi escutado.
           </p>
         </div>
@@ -125,7 +125,7 @@ function EmptyState() {
         🌱
       </span>
       <h3 className="mt-2 text-base font-semibold text-text-primary">
-        Tua historia comeca agora
+        Tua história começa agora
       </h3>
       <p className="mt-1 text-sm text-text-secondary">
         Manda um talento ou uma queixa que aparece aqui na hora.

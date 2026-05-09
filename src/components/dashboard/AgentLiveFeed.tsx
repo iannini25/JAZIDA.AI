@@ -1,7 +1,7 @@
 "use client";
 
-// AgentLiveFeed Strata — log mineral, mono.
-// Cada linha: timestamp · agente (cor mineral) · acao · chip.
+// AgentLiveFeed Strata Solo — log mineral mono em fundo claro.
+// Cada linha: timestamp · agente (cor mineral) · ação · chip.
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -76,8 +76,8 @@ export function AgentLiveFeed({ limit = 12, className }: AgentLiveFeedProps) {
     };
   }, [limit]);
 
-  // Construir snapshot de strata pra mini CoreSample lateral
-  const lastByAgent: AgentName[] = [
+  // Mini CoreSample lateral mostrando quais agentes já tiveram atividade
+  const KNOWN: AgentName[] = [
     "Acolhida",
     "Talento",
     "Voz",
@@ -86,7 +86,7 @@ export function AgentLiveFeed({ limit = 12, className }: AgentLiveFeedProps) {
     "Pulsar",
     "Pacto",
   ];
-  const stratumStatus = lastByAgent.map((agent) => {
+  const stratumStatus = KNOWN.map((agent) => {
     const recent = events.find((e) => e.agentName === agent);
     return {
       agent,
@@ -99,11 +99,11 @@ export function AgentLiveFeed({ limit = 12, className }: AgentLiveFeedProps) {
       <div className="flex items-center justify-between">
         <span
           className="micro inline-flex items-center gap-1.5"
-          style={{ color: "var(--jazida-verde-vivo)" }}
+          style={{ color: "var(--jazida-verde)" }}
         >
           <span
             className={cn(
-              "h-1.5 w-1.5 rounded-full bg-jazida-verde-vivo",
+              "h-1.5 w-1.5 rounded-full bg-jazida-verde",
               pulse && "animate-pulse-dot"
             )}
           />
@@ -112,10 +112,11 @@ export function AgentLiveFeed({ limit = 12, className }: AgentLiveFeedProps) {
         <ConnectionLabel connected={connected} />
       </div>
 
-      <div className="grid items-start gap-4" style={{ gridTemplateColumns: "48px 1fr" }}>
-        <div className="dark-scope">
-          <CoreSample strata={stratumStatus} variant="mini" />
-        </div>
+      <div
+        className="grid items-start gap-4"
+        style={{ gridTemplateColumns: "48px 1fr" }}
+      >
+        <CoreSample strata={stratumStatus} variant="mini" />
         <ul className="flex flex-col overflow-y-auto pr-1">
           <AnimatePresence initial={false}>
             {events.map((e) => (
@@ -126,10 +127,13 @@ export function AgentLiveFeed({ limit = 12, className }: AgentLiveFeedProps) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
-                className="grid items-center gap-3 border-b border-subsolo-linha py-2 last:border-b-0"
+                className="grid items-center gap-3 border-b border-solo-linha py-2 last:border-b-0"
                 style={{ gridTemplateColumns: "70px 90px 1fr auto" }}
               >
-                <span className="mono-s text-subsolo-osso-tenue" style={{ fontSize: 11 }}>
+                <span
+                  className="mono-s text-solo-tinta-tenue"
+                  style={{ fontSize: 11 }}
+                >
                   {formatTime(e.timestamp)}
                 </span>
                 <span
@@ -141,11 +145,14 @@ export function AgentLiveFeed({ limit = 12, className }: AgentLiveFeedProps) {
                 >
                   {e.agentName.toLowerCase()}
                 </span>
-                <span className="body-s text-subsolo-osso-suave truncate">
+                <span className="body-s truncate text-solo-tinta-suave">
                   {e.action}
                 </span>
                 {e.payload?.fallback && (
-                  <span className="strata-chip strata-chip-sub" style={{ fontSize: 10 }}>
+                  <span
+                    className="strata-chip"
+                    style={{ fontSize: 10 }}
+                  >
                     fallback
                   </span>
                 )}
@@ -153,7 +160,7 @@ export function AgentLiveFeed({ limit = 12, className }: AgentLiveFeedProps) {
             ))}
           </AnimatePresence>
           {events.length === 0 && (
-            <li className="body-s py-6 text-center text-subsolo-osso-tenue">
+            <li className="body-s py-6 text-center text-solo-tinta-tenue">
               Aguardando sinais...
             </li>
           )}
@@ -165,7 +172,7 @@ export function AgentLiveFeed({ limit = 12, className }: AgentLiveFeedProps) {
 
 function ConnectionLabel({ connected }: { connected: boolean }) {
   return (
-    <span className="micro text-subsolo-osso-tenue">
+    <span className="micro text-solo-tinta-tenue">
       {connected ? "conectado" : "offline"}
     </span>
   );

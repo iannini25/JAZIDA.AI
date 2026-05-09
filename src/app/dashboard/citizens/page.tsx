@@ -82,7 +82,7 @@ export default function CitizensPage() {
     );
     const ok = results.filter((r) => r.status === "fulfilled").length;
     setBatchBusy(false);
-    setBatchResult(`${ok}/${results.length} replicas disparadas`);
+    setBatchResult(`${ok}/${results.length} réplicas disparadas`);
   }
 
   return (
@@ -93,13 +93,13 @@ export default function CitizensPage() {
             Base anonimizada
           </p>
           <h1 className="text-lg font-bold text-text-primary">
-            Cidadaos · {citizens.length}
+            Cidadãos · {citizens.length}
           </h1>
         </div>
         <input
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          placeholder="filtrar nome, bairro ou ocupacao"
+          placeholder="filtrar nome, bairro ou ocupação"
           className="ml-auto h-9 w-72 rounded-lg border border-gray-200 px-3 text-sm focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/30"
         />
         <button
@@ -108,7 +108,7 @@ export default function CitizensPage() {
           disabled={batchBusy || citizens.length === 0}
           className="rounded-lg bg-brand-green px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
         >
-          {batchBusy ? "disparando..." : "Aprovar respostas pendentes"}
+          {batchBusy ? "disparando…" : "Aprovar respostas pendentes"}
         </button>
       </header>
 
@@ -122,7 +122,7 @@ export default function CitizensPage() {
             <span className="text-right">criado</span>
           </div>
           {loading && (
-            <div className="p-6 text-sm text-text-secondary">carregando...</div>
+            <div className="p-6 text-sm text-text-secondary">carregando…</div>
           )}
           {!loading &&
             filtered.map((c) => (
@@ -135,7 +135,7 @@ export default function CitizensPage() {
             ))}
           {!loading && filtered.length === 0 && (
             <div className="p-6 text-sm text-text-secondary">
-              nenhum cidadao no filtro.
+              nenhum cidadão no filtro.
             </div>
           )}
           {batchResult && (
@@ -193,11 +193,11 @@ export default function CitizensPage() {
               </p>
               <div className="flex max-h-[460px] flex-col gap-2 overflow-y-auto pr-1">
                 {historyLoading && (
-                  <p className="text-xs text-text-secondary">carregando...</p>
+                  <p className="text-xs text-text-secondary">carregando…</p>
                 )}
                 {!historyLoading && history && history.items.length === 0 && (
                   <p className="text-xs text-text-secondary">
-                    Sem interacoes ainda.
+                    Sem interações ainda.
                   </p>
                 )}
                 {history?.items.map((item, i) => (

@@ -32,13 +32,13 @@ import type { BussolaMatch, TalentEntry } from "@/types";
 type ViewState = "form" | "processing" | "matches" | "pending_approval" | "error";
 
 const PLACEHOLDER = `ex: queria estudar enfermagem
-ex: sei costurar vestido de noiva ha 30 anos
+ex: sei costurar vestido de noiva há 30 anos
 ex: quero abrir uma padaria no bairro`;
 
 const CASCADE_STEPS = [
   { agent: "Acolhida", description: "te ouvindo de verdade" },
-  { agent: "Talento", description: "entendendo o que voce quer" },
-  { agent: "Bussola", description: "buscando caminhos pra voce" },
+  { agent: "Talento", description: "entendendo o que você quer" },
+  { agent: "Bussola", description: "buscando caminhos pra você" },
 ];
 
 export default function TalentoPageWrapper() {
@@ -52,7 +52,7 @@ export default function TalentoPageWrapper() {
 function TalentoLoading() {
   return (
     <main className="flex flex-1 items-center justify-center px-5 py-10 text-sm text-text-secondary">
-      carregando...
+      carregando…
     </main>
   );
 }
@@ -223,18 +223,18 @@ function FormView(props: {
           className="mt-1 text-2xl font-bold leading-tight text-text-primary"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          O que voce faz de melhor?
+          O que você faz de melhor?
           <br />
           O que quer aprender?
         </h1>
         <p className="mt-2 text-sm text-text-secondary">
-          Manda ver — pode ser por texto ou por voz. To aqui contigo.
+          Manda ver — pode ser por texto ou por voz. Tô aqui contigo.
         </p>
       </div>
 
       {props.remaining !== null && (
         <div className="rounded-xl bg-brand-bg px-3 py-2 text-xs text-text-secondary">
-          Voce pode enviar mais <strong className="text-text-primary">{props.remaining}</strong> talento(s) nesta hora.
+          Você pode enviar mais <strong className="text-text-primary">{props.remaining}</strong> talento(s) nesta hora.
         </div>
       )}
 
@@ -252,7 +252,7 @@ function FormView(props: {
           disabled
           aria-disabled
           className="flex min-h-[56px] items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 text-base font-semibold text-text-secondary opacity-60"
-          title="Em breve — gravar audio"
+          title="Em breve — gravar áudio"
         >
           🎤 Por voz
         </button>
@@ -270,7 +270,7 @@ function FormView(props: {
         href="/app"
         className="mt-2 self-center text-sm text-text-secondary underline-offset-2 hover:underline"
       >
-        voltar pra inicio
+        voltar pro início
       </Link>
     </>
   );
@@ -290,13 +290,13 @@ function ProcessingView({
     <>
       <div>
         <p className="text-xs uppercase tracking-wider text-brand-green">
-          JAZIDA ta pensando
+          JAZIDA tá pensando
         </p>
         <h2
           className="mt-1 text-xl font-bold text-text-primary"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          So um instante...
+          Só um instante…
         </h2>
         <blockquote className="mt-3 rounded-2xl bg-brand-bg p-4 text-sm italic text-text-primary">
           "{text}"
@@ -331,8 +331,8 @@ function PendingApprovalView(props: {
             : "Beleza!"}
         </h2>
         <p className="mt-2 text-sm text-text-secondary">
-          A equipe da mineradora vai analisar as recomendacoes que a Bussola
-          encontrou pra "{shortQuote(props.text)}".
+          A equipe da mineradora vai analisar as recomendações que a Bússola
+          encontrou pra “{shortQuote(props.text)}”.
         </p>
       </motion.div>
 
@@ -346,11 +346,11 @@ function PendingApprovalView(props: {
           <span className="text-xl">⏳</span>
           <div>
             <p className="text-sm font-semibold text-amber-800">
-              Aguardando aprovacao
+              Aguardando aprovação
             </p>
             <p className="text-xs text-amber-700">
-              As recomendacoes precisam ser validadas pela equipe antes de
-              aparecerem pra voce. Voce sera notificado quando estiver pronto.
+              As recomendações precisam ser validadas pela equipe antes de
+              aparecerem pra você. Você será notificado quando estiver pronto.
             </p>
           </div>
         </div>
@@ -362,7 +362,7 @@ function PendingApprovalView(props: {
           onClick={props.onSeeHistory}
           className="flex min-h-[52px] items-center justify-center rounded-2xl border-2 border-brand-green text-base font-semibold text-brand-green hover:bg-brand-green hover:text-white"
         >
-          Ver minha historia
+          Ver minha história
         </button>
         <button
           type="button"
@@ -392,16 +392,16 @@ function MatchesView(props: {
     <>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <p className="text-xs uppercase tracking-wider text-brand-green">
-          Bussola achou {props.matches.length} caminhos
+          Bússola achou {props.matches.length} caminhos
         </p>
         <h2
           className="mt-1 text-xl font-bold text-text-primary"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          {props.citizenName ? `Olha so, ${props.citizenName}.` : "Olha so."}
+          {props.citizenName ? `Olha só, ${props.citizenName}.` : "Olha só."}
         </h2>
         <p className="mt-1 text-sm text-text-secondary">
-          A gente cruzou "{shortQuote(props.text)}" com programas reais aqui em
+          A gente cruzou “{shortQuote(props.text)}” com programas reais aqui em
           Mariana. Aprovado pela equipe da mineradora.
         </p>
       </motion.div>
@@ -425,7 +425,7 @@ function MatchesView(props: {
           className="rounded-2xl border-2 border-brand-green bg-brand-green-light/10 p-4 text-sm text-text-primary"
         >
           Show, anotei seu interesse em <strong>{props.selectedTitle}</strong>.
-          Em breve te chamo no whats com o pre-cadastro pronto.
+          Em breve te chamo no Whats com o pré-cadastro pronto.
         </motion.div>
       )}
 
@@ -435,7 +435,7 @@ function MatchesView(props: {
           onClick={props.onSeeHistory}
           className="flex min-h-[52px] items-center justify-center rounded-2xl border-2 border-brand-green text-base font-semibold text-brand-green hover:bg-brand-green hover:text-white"
         >
-          Ver minha historia
+          Ver minha história
         </button>
         <button
           type="button"
@@ -477,5 +477,5 @@ function ErrorView({
 }
 
 function shortQuote(s: string): string {
-  return s.length > 60 ? s.slice(0, 60).trim() + "..." : s;
+  return s.length > 60 ? s.slice(0, 60).trim() + "…" : s;
 }

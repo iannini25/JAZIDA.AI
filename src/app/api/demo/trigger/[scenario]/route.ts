@@ -73,7 +73,7 @@ function ensureCitizen(name: string, fields: Partial<Citizen>): Citizen {
 async function triggerMaria() {
   const maria = ensureCitizen("Maria Aparecida", {
     age: 47,
-    neighborhood: "Santo Antonio",
+    neighborhood: "Santo Antônio",
     occupation: "Dona de casa",
     phone: "+5531999990001",
   });

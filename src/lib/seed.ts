@@ -51,19 +51,19 @@ export function runSeed(): {
   // 5 cidadaos do master
   const maria = makeCitizen("Maria Aparecida", {
     age: 47,
-    neighborhood: "Santo Antonio",
+    neighborhood: "Santo Antônio",
     occupation: "Dona de casa",
     phone: "+5531999990001",
   });
 
-  const joao = makeCitizen("Joao Pedro Silva", {
+  const joao = makeCitizen("João Pedro Silva", {
     age: 38,
     neighborhood: "Centro",
     occupation: "Padeiro",
     phone: "+5531999990002",
   });
 
-  const ana = makeCitizen("Ana Lucia Ferreira", {
+  const ana = makeCitizen("Ana Lúcia Ferreira", {
     age: 34,
     neighborhood: "Cabanas",
     occupation: "Professora",
@@ -289,7 +289,7 @@ export function runSeed(): {
     const c = makeCitizen(`${first} ${last}`, {
       age: 25 + (i % 40),
       neighborhood:
-        ["Centro", "Cabanas", "Santa Cruz", "Passagem", "Santo Antonio"][
+        ["Centro", "Cabanas", "Santa Cruz", "Passagem", "Santo Antônio"][
           i % 5
         ],
       occupation: ["Comerciante", "Professora", "Estudante", "Dona de casa"][

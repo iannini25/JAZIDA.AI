@@ -77,7 +77,7 @@ function TalentItem({
       {matches.length > 0 && (
         <div className="mt-3 border-t border-solo-linha pt-3">
           <p className="micro text-jazida-verde">
-            Bussola achou {matches.length} caminhos
+            Bússola achou {matches.length} caminhos
           </p>
           <ul className="mt-2 space-y-1 body-s text-solo-tinta">
             {matches.slice(0, 3).map((m, i) => (
@@ -105,7 +105,7 @@ const STATUS_INFO: Record<
   { label: string; chipClass: string }
 > = {
   open: {
-    label: "em analise",
+    label: "em análise",
     chipClass: "border-[rgba(201,133,58,0.4)] text-sinal-alerta bg-[rgba(201,133,58,0.08)]",
   },
   in_progress: {
@@ -130,7 +130,7 @@ function ComplaintItem({
       <Header
         icon={isSuggestion ? "i-cris" : "i-meg"}
         iconColor={isSuggestion ? "var(--jazida-verde)" : "var(--ferro)"}
-        kind={isSuggestion ? "§ sugestao" : "§ reclamacao"}
+        kind={isSuggestion ? "§ sugestão" : "§ reclamação"}
         iso={complaint.createdAt}
         trailing={
           <span
@@ -154,7 +154,7 @@ function ComplaintItem({
           </span>
         )}
         <span className="strata-chip">
-          urgencia {complaint.classification.urgency}
+          urgência {complaint.classification.urgency}
         </span>
       </div>
       <p className="mono-s mt-3 text-solo-tinta-tenue">
@@ -175,7 +175,7 @@ function IdeaItem({
 }: {
   idea: Extract<HistoryItem, { kind: "idea" }>["data"];
 }) {
-  // Strata: nao mostramos veredito/score/plano pro cidadao.
+  // Strata: não mostramos veredito/score/plano pro cidadão.
   // Apenas confirmamos que recebemos e estamos analisando.
   return (
     <article className="rounded-[10px] border border-solo-linha bg-solo-papel-claro p-4">
@@ -186,7 +186,7 @@ function IdeaItem({
         iso={idea.createdAt}
         trailing={
           <span className="strata-chip border-[rgba(63,128,96,0.4)] bg-jazida-verde/10 text-jazida-verde">
-            [em analise]
+            [em análise]
           </span>
         }
       />
@@ -194,8 +194,8 @@ function IdeaItem({
         “{idea.rawInput}”
       </p>
       <p className="caption mt-3 text-solo-tinta-tenue">
-        sua ideia foi recebida. equipe de investimento social vai analisar e te
-        retornar com proximos passos.
+        sua ideia foi recebida. a equipe de investimento social vai analisar e
+        te retornar com os próximos passos.
       </p>
     </article>
   );

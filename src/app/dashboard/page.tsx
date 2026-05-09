@@ -139,7 +139,7 @@ function DashboardOverview() {
         sentiment={sentiment ?? undefined}
         rightSlot={
           <div className="flex items-center gap-3 text-[11px] text-text-secondary">
-            <Stat label="cidadaos" value={citizenCount} />
+            <Stat label="cidadãos" value={citizenCount} />
             <Stat label="sinais" value={signalsCount} />
             <Stat label="alertas" value={alerts.length} highlight />
           </div>
@@ -154,7 +154,7 @@ function DashboardOverview() {
             subtitle={
               sentiment
                 ? `${sentiment.topThemes.length} temas mapeados · ${sentiment.byNeighborhood.length} bairros · atualiza a cada 10s`
-                : "carregando..."
+                : "carregando…"
             }
           >
             {sentiment && (
@@ -219,7 +219,7 @@ function DashboardOverview() {
                 href="/dashboard/citizens"
                 className="text-xs font-semibold text-brand-green hover:underline"
               >
-                ver cidadaos →
+                ver cidadãos →
               </Link>
             }
           >
@@ -228,7 +228,7 @@ function DashboardOverview() {
 
           <Quadrant
             className="xl:col-span-5"
-            title="Agents ao vivo"
+            title="Agentes ao vivo"
             subtitle="conectado por SSE — pulsa a cada 2s"
             bodyClassName="max-h-[460px] overflow-hidden"
           >
@@ -241,21 +241,21 @@ function DashboardOverview() {
             subtitle={
               esg
                 ? `gerado ${formatRelative(esg.generatedAt)} · ${esg.fragments.length} fragmentos`
-                : "gerando..."
+                : "gerando…"
             }
             rightAction={
               <Link
                 href="/dashboard/esg-report"
                 className="text-xs font-semibold text-brand-green hover:underline"
               >
-                relatorio completo →
+                relatório completo →
               </Link>
             }
           >
             <ESGReportPreview
               fragments={esg?.fragments ?? []}
               showAll={false}
-              emptyHint="Gerando rascunho do ESG report..."
+              emptyHint="Gerando rascunho do ESG report…"
             />
           </Quadrant>
 

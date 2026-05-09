@@ -13,12 +13,13 @@ export default function OportunidadesPage() {
           Just Transition · agente Semente
         </p>
         <h1 className="text-lg font-bold text-text-primary">
-          Oportunidades economicas detectadas
+          Oportunidades econômicas detectadas
         </h1>
         <p className="mt-1 text-xs text-text-secondary">
-          Cidadaos enviam ideias de negocio. JAZIDA cruza com demanda real da
-          cidade, competicao e programas de capital semente. Cada idea financiada
-          aqui e renda local recorrente — KPI direto pra ICMM PE9 / CSRD ESRS S3.
+          Cidadãos enviam ideias de negócio. JAZIDA cruza com demanda real da
+          cidade, competição e programas de capital semente. Cada ideia
+          financiada aqui é renda local recorrente — KPI direto pra ICMM PE9 /
+          CSRD ESRS S3.
         </p>
       </header>
 

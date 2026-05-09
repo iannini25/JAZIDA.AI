@@ -21,14 +21,14 @@ import type { Complaint } from "@/types";
 type Mode = "complaint" | "suggestion";
 type ViewState = "form" | "processing" | "result" | "error";
 
-const PLACEHOLDER_COMPLAINT = `ex: a poeira da pedreira ta insuportavel, ninguem consegue estender roupa
-ex: caminhoes passando de madrugada tremendo a casa toda`;
+const PLACEHOLDER_COMPLAINT = `ex: a poeira da pedreira tá insuportável, ninguém consegue estender roupa
+ex: caminhões passando de madrugada tremendo a casa toda`;
 
 const PLACEHOLDER_SUGGESTION = `ex: podia ter um curso de gastronomia local pra mulheres do bairro
-ex: a praca podia ter mais arvore`;
+ex: a praça podia ter mais árvores`;
 
 const CASCADE_STEPS = [
-  { agent: "Voz", description: "classificando o que voce relatou" },
+  { agent: "Voz", description: "classificando o que você relatou" },
   { agent: "Pulsar", description: "atualizando o sentimento da cidade" },
   { agent: "Pacto", description: "registrando como sinal ESG" },
 ];
@@ -44,7 +44,7 @@ export default function VozPageWrapper() {
 function VozLoading() {
   return (
     <main className="flex flex-1 items-center justify-center px-5 py-10 text-sm text-text-secondary">
-      carregando...
+      carregando…
     </main>
   );
 }
@@ -191,7 +191,7 @@ function FormView(props: {
           className="mt-1 text-2xl font-bold leading-tight text-text-primary"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          O que ta ruim?
+          O que tá ruim?
           <br />
           Como pode melhorar?
         </h1>
@@ -203,7 +203,7 @@ function FormView(props: {
 
       {props.remaining !== null && (
         <div className="rounded-xl bg-brand-bg px-3 py-2 text-xs text-text-secondary">
-          Voce pode enviar mais <strong className="text-text-primary">{props.remaining}</strong> queixa(s)/sugestao(oes) nesta hora.
+          Você pode enviar mais <strong className="text-text-primary">{props.remaining}</strong> queixa(s)/sugestão(ões) nesta hora.
         </div>
       )}
 
@@ -255,9 +255,9 @@ function FormView(props: {
           disabled
           aria-disabled
           className="flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold text-text-secondary opacity-60"
-          title="Em breve — gravar audio"
+          title="Em breve — gravar áudio"
         >
-          🎤 Audio
+          🎤 Áudio
         </button>
       </div>
 
@@ -274,7 +274,7 @@ function FormView(props: {
         href="/app"
         className="self-center text-sm text-text-secondary underline-offset-2 hover:underline"
       >
-        voltar pra inicio
+        voltar pro início
       </Link>
     </>
   );
@@ -291,7 +291,7 @@ function ProcessingView({ text, mode }: { text: string; mode: Mode }) {
           className="mt-1 text-xl font-bold text-text-primary"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          {mode === "complaint" ? "Registrando queixa..." : "Registrando sugestao..."}
+          {mode === "complaint" ? "Registrando queixa…" : "Registrando sugestão…"}
         </h2>
         <blockquote className="mt-3 rounded-2xl bg-brand-bg p-4 text-sm italic text-text-primary">
           “{text}”
@@ -323,11 +323,11 @@ function ResultView(props: {
           className="mt-1 text-xl font-bold text-text-primary"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          A gente ja ta olhando
+          A gente já tá olhando
           {props.citizenName ? `, ${props.citizenName}` : ""}.
         </h2>
         <p className="mt-1 text-sm text-text-secondary">
-          Quando a Vale tomar uma acao, te aviso aqui mesmo.
+          Quando a Vale tomar uma ação, te aviso aqui mesmo.
         </p>
       </motion.div>
 
@@ -357,7 +357,7 @@ function ResultView(props: {
                   : "rounded-md bg-gray-100 px-2 py-1 text-text-primary"
             }
           >
-            urgencia {cls.urgency}
+            urgência {cls.urgency}
           </span>
           <span className="rounded-md bg-gray-100 px-2 py-1 text-text-primary">
             {cls.impact === "collective" ? "coletivo" : "individual"}
@@ -371,7 +371,7 @@ function ResultView(props: {
           onClick={props.onSeeHistory}
           className="flex min-h-[52px] items-center justify-center rounded-2xl bg-brand-green text-base font-semibold text-white"
         >
-          Ver minha historia
+          Ver minha história
         </button>
         <button
           type="button"

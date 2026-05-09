@@ -1,6 +1,6 @@
 "use client";
 
-// DashboardHeader Strata — top bar Subsolo. Crumbs editorial + sentimento mono + relogio.
+// DashboardHeader Strata Solo — top bar clara. Crumbs editorial + sentimento mono + relógio.
 
 import { useEffect, useState } from "react";
 import type { SentimentSnapshot } from "@/types";
@@ -35,43 +35,44 @@ export function DashboardHeader({
         : "var(--sinal-atencao)";
 
   return (
-    <header className="border-b border-subsolo-linha-forte bg-subsolo-tinta">
-      {/* topbar com breadcrumbs */}
+    <header className="border-b border-solo-linha bg-solo-papel-claro">
       <div className="flex h-14 items-center gap-4 px-8">
-        <div className="mono-s text-subsolo-osso-tenue flex items-center gap-2">
-          <span>operacao</span>
+        <div className="mono-s flex items-center gap-2 text-solo-tinta-tenue">
+          <span>operação</span>
           <Icon name="i-chev" size={11} />
           <span>{cityLabel.toLowerCase()}</span>
           <Icon name="i-chev" size={11} />
-          <span className="text-subsolo-osso">visao geral</span>
+          <span className="text-solo-tinta">visão geral</span>
         </div>
         {rightSlot && <div className="ml-auto">{rightSlot}</div>}
       </div>
 
-      {/* hero do header */}
       <div className="flex flex-wrap items-center gap-x-8 gap-y-3 px-8 py-5">
         <div>
-          <p className="micro text-ferro">
+          <p className="micro" style={{ color: "var(--ferro)" }}>
             JAZIDA · {miner}
           </p>
-          <h1 className="display-m mt-1 text-subsolo-osso" style={{ fontSize: 22 }}>
+          <h1 className="display-m mt-1 text-solo-tinta" style={{ fontSize: 22 }}>
             {cityLabel}
           </h1>
         </div>
 
         {sentiment && (
-          <div className="flex items-baseline gap-2 border-l border-subsolo-linha-forte pl-8">
-            <span className="micro text-subsolo-osso-tenue">sentimento</span>
-            <span className="mono-l" style={{ color: sentimentColor, fontSize: 22 }}>
+          <div className="flex items-baseline gap-2 border-l border-solo-linha-forte pl-8">
+            <span className="micro text-solo-tinta-tenue">sentimento</span>
+            <span
+              className="mono-l"
+              style={{ color: sentimentColor, fontSize: 22 }}
+            >
               {display}
             </span>
-            <span className="body-s text-subsolo-osso-suave">{trendSymbol}</span>
+            <span className="body-s text-solo-tinta-suave">{trendSymbol}</span>
           </div>
         )}
 
-        <div className="flex items-baseline gap-2 border-l border-subsolo-linha-forte pl-8">
-          <span className="micro text-subsolo-osso-tenue">atualizado</span>
-          <span className="mono-s text-subsolo-osso">{now}</span>
+        <div className="flex items-baseline gap-2 border-l border-solo-linha-forte pl-8">
+          <span className="micro text-solo-tinta-tenue">atualizado</span>
+          <span className="mono-s text-solo-tinta">{now}</span>
         </div>
       </div>
     </header>

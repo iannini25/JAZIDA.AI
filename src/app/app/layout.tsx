@@ -6,7 +6,7 @@ import { IconSprite } from "@/components/ui/Icons";
 export const metadata: Metadata = {
   title: "JAZIDA — sua voz, sua cidade",
   description:
-    "App do cidadao do JAZIDA AI: cadastre talento, mande queixa ou sugestao, veja o que a mineradora fez por causa de voce.",
+    "App do cidadão do JAZIDA AI: cadastre talento, mande queixa ou sugestão, veja o que a mineradora fez por causa de você.",
 };
 
 export default function CitizenAppLayout({

@@ -1,7 +1,7 @@
 "use client";
 
-// ESGReportPreview Strata — documento corporativo. Newsreader serif,
-// hairlines, evidencias chip-style mono.
+// ESGReportPreview Strata Solo — documento corporativo em fundo claro.
+// Newsreader serif, hairlines, evidências chip-style mono.
 
 import ReactMarkdown from "react-markdown";
 import type { ESGReportFragment } from "@/types";
@@ -20,7 +20,7 @@ export function ESGReportPreview({
 }) {
   if (fragments.length === 0) {
     return (
-      <div className="rounded-[10px] border border-dashed border-subsolo-linha-forte p-6 text-center body-s text-subsolo-osso-tenue">
+      <div className="rounded-[10px] border border-dashed border-solo-linha-forte p-6 text-center body-s text-solo-tinta-tenue">
         {emptyHint || "Nenhum rascunho gerado ainda."}
       </div>
     );
@@ -31,24 +31,28 @@ export function ESGReportPreview({
       {visible.map((f, i) => (
         <article
           key={i}
-          className="rounded-[10px] border border-subsolo-linha-forte bg-subsolo-tinta-3 p-5 text-subsolo-osso"
+          className="rounded-[10px] border border-solo-linha bg-solo-papel-claro p-5 text-solo-tinta"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          <header className="flex items-center justify-between border-b border-subsolo-linha pb-2 micro text-subsolo-osso-tenue">
+          <header className="micro flex items-center justify-between border-b border-solo-linha pb-2 text-solo-tinta-tenue">
             <span>
               {f.framework} · {f.section}
             </span>
             <span>JAZIDA · Mariana</span>
           </header>
-          <div className="esg-prose mt-3 body-strata text-subsolo-osso">
+          <div className="esg-prose mt-3 body-strata text-solo-tinta">
             <ReactMarkdown>{f.content}</ReactMarkdown>
           </div>
           {f.evidence && f.evidence.length > 0 && (
-            <footer className="mt-4 border-t border-subsolo-linha pt-3">
-              <p className="micro text-subsolo-osso-tenue">Evidencias</p>
+            <footer className="mt-4 border-t border-solo-linha pt-3">
+              <p className="micro text-solo-tinta-tenue">Evidências</p>
               <ul className="mt-2 flex flex-wrap gap-2">
                 {f.evidence.slice(0, 8).map((e, j) => (
-                  <li key={j} className="strata-chip strata-chip-sub" style={{ fontSize: 10 }}>
+                  <li
+                    key={j}
+                    className="strata-chip"
+                    style={{ fontSize: 10 }}
+                  >
                     {e.type}: {e.reference}
                   </li>
                 ))}

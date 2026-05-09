@@ -16,7 +16,7 @@ export function ProtocolBadge({ protocol }: { protocol: string }) {
       </p>
       <p className="mono-l mt-3 text-jazida-verde">{protocol}</p>
       <p className="body-s mt-3 text-solo-tinta-suave">
-        guarde esse numero. e sua prova.
+        guarde esse número. é sua prova.
       </p>
     </motion.div>
   );

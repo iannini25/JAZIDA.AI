@@ -23,7 +23,7 @@ function colorFor(v: number): string {
 }
 
 function trendLabel(t: SentimentSnapshot["trend"]): string {
-  return t === "up" ? "↑ subindo" : t === "down" ? "↓ caindo" : "→ estavel";
+  return t === "up" ? "↑ subindo" : t === "down" ? "↓ caindo" : "→ estável";
 }
 
 function trendColor(t: SentimentSnapshot["trend"]): string {

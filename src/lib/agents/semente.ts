@@ -324,7 +324,7 @@ const HARDCODED_BEATRIZ: RawSemente = {
     title: "Costureira de Vestido de Noiva — Mariana",
     category: "moda/costura",
     description:
-      "Confeccao sob medida de vestidos de noiva e festa pra moradoras de Mariana e regiao. Atendimento domiciliar e atelie em casa.",
+      "Confecção sob medida de vestidos de noiva e festa pra moradoras de Mariana e região. Atendimento domiciliar e ateliê em casa.",
     targetCustomer:
       "Noivas e formandas de Mariana, Ouro Preto e Itabirito (raio 30km)",
     estimatedCapex: { min: 3500, max: 8000 },
@@ -336,7 +336,7 @@ const HARDCODED_BEATRIZ: RawSemente = {
     demandSignal: {
       score: 88,
       evidence:
-        "47 cidadaos cadastraram 'vestido sob medida' ou 'costureira' como servico necessario nos ultimos 6 meses",
+        "47 cidadãos cadastraram 'vestido sob medida' ou 'costureira' como serviço necessário nos últimos 6 meses",
       relatedTalents: 47,
     },
     competitionLevel: "none",
@@ -345,71 +345,71 @@ const HARDCODED_BEATRIZ: RawSemente = {
     localContentMatch: {
       potential: false,
       description:
-        "Nao ha demanda direta da Vale pra esse servico, mas ha demanda indireta via colaboradores",
+        "Não há demanda direta da Vale pra esse serviço, mas há demanda indireta via colaboradores",
     },
   },
   verdict: {
     score: 87,
     level: "go",
-    headline: "Mercado represado: 47 pedidos, zero oferta formal. Voce pode ser a primeira.",
+    headline: "Mercado represado: 47 pedidos, zero oferta formal. Você pode ser a primeira.",
     reasoning:
-      "Demanda altissima e competicao inexistente em Mariana. CAPEX baixo (R$ 3,5–8k). Payback em 4 meses. Categoria perfeita pra MEI. Programa Vale Fundacao cobre quase todo o capital inicial.",
+      "Demanda altíssima e competição inexistente em Mariana. CAPEX baixo (R$ 3,5–8k). Payback em 4 meses. Categoria perfeita pra MEI. Programa Vale Fundação cobre quase todo o capital inicial.",
   },
   actionPlan: {
     nextSteps: [
       {
         order: 1,
         title: "Abra MEI online",
-        description: "Formalizacao gratuita em 15 minutos no portal gov.br",
+        description: "Formalização gratuita em 15 minutos no portal gov.br",
         estimatedTime: "15 min",
         link: "https://gov.br/mei",
       },
       {
         order: 2,
-        title: "Capital Semente Vale Fundacao",
+        title: "Capital Semente Vale Fundação",
         description:
-          "Programa 'Empreender Mariana' financia ate R$ 5.000 pra MEIs novos",
+          "Programa 'Empreender Mariana' financia até R$ 5.000 pra MEIs novos",
         estimatedTime: "2 dias pra cadastro",
         link: "https://fundacaovale.org/",
       },
       {
         order: 3,
-        title: "Curso Sebrae 'Costura como Negocio'",
+        title: "Curso Sebrae 'Costura como Negócio'",
         description: "30 horas, online, gratuito",
-        estimatedTime: "1 mes",
+        estimatedTime: "1 mês",
         link: "https://sebrae.com.br",
       },
       {
         order: 4,
         title: "Cadastre-se no JAZIDA Marketplace",
-        description: "Os 47 cidadaos que pediram costureira vao te ver primeiro",
+        description: "Os 47 cidadãos que pediram costureira vão te ver primeiro",
         estimatedTime: "5 min",
       },
       {
         order: 5,
         title: "Banco do Povo MG — Linha Empreendedora",
         description:
-          "Microcredito ate R$ 21.000 com taxas reduzidas pra mulheres",
+          "Microcrédito até R$ 21.000 com taxas reduzidas pra mulheres",
         estimatedTime: "1 semana",
         link: "https://bdpmg.com.br",
       },
     ],
     fundingOpportunities: [
       {
-        name: "Vale Fundacao · Empreender Mariana",
+        name: "Vale Fundação · Empreender Mariana",
         type: "grant",
-        amount: "ate R$ 5.000",
+        amount: "até R$ 5.000",
         eligibility:
-          "MEI recem-aberto, residente em Mariana ha 2+ anos",
+          "MEI recém-aberto, residente em Mariana há 2+ anos",
       },
       {
         name: "Banco do Povo MG · Empreendedora",
         type: "loan",
-        amount: "ate R$ 21.000",
+        amount: "até R$ 21.000",
         eligibility: "MEI ativo, residente MG, mulher",
       },
       {
-        name: "Sebrae · Costura como Negocio",
+        name: "Sebrae · Costura como Negócio",
         type: "training",
         eligibility: "Aberto a todos",
       },
@@ -422,7 +422,7 @@ const HARDCODED_PADARIA: RawSemente = {
     title: "Padaria de Bairro — Mariana",
     category: "comercio/alimentacao",
     description:
-      "Padaria de bairro com producao propria de paes artesanais e salgados pra moradores locais.",
+      "Padaria de bairro com produção própria de pães artesanais e salgados pra moradores locais.",
     targetCustomer: "Moradores do bairro num raio de 1km",
     estimatedCapex: { min: 25000, max: 60000 },
     estimatedMonthlyRevenue: { min: 8000, max: 18000 },
@@ -433,12 +433,12 @@ const HARDCODED_PADARIA: RawSemente = {
     demandSignal: {
       score: 55,
       evidence:
-        "12 cidadaos mencionaram 'padaria' nos ultimos 6 meses, demanda moderada e regular",
+        "12 cidadãos mencionaram 'padaria' nos últimos 6 meses, demanda moderada e regular",
       relatedTalents: 12,
     },
     competitionLevel: "saturated",
     competitionEvidence:
-      "6 padarias ja operam em Mariana centro/Cabanas. Mercado disputado.",
+      "6 padarias já operam em Mariana centro/Cabanas. Mercado disputado.",
     localContentMatch: { potential: false, description: "" },
   },
   verdict: {
@@ -446,35 +446,35 @@ const HARDCODED_PADARIA: RawSemente = {
     level: "pivot",
     headline: "Mercado saturado, mas tem nicho aberto: confeitaria de festa.",
     reasoning:
-      "Padaria comum tem 6 competidores em Mariana — competicao alta e margens apertadas. Mas zero confeitaria especializada em bolo de casamento/festa. Vire essa esquina e a ideia ressurge como GO.",
+      "Padaria comum tem 6 competidores em Mariana — competição alta e margens apertadas. Mas zero confeitaria especializada em bolo de casamento/festa. Vire essa esquina e a ideia ressurge como GO.",
   },
   actionPlan: {
     nextSteps: [
       {
         order: 1,
         title: "Pivote: especialize em festas/casamentos",
-        description: "Bolo cenografico, doces de festa — nicho sem competicao em Mariana",
+        description: "Bolo cenográfico, doces de festa — nicho sem competição em Mariana",
         estimatedTime: "1 semana de pesquisa",
       },
       {
         order: 2,
-        title: "Curso Sebrae 'Confeitaria como Negocio'",
-        description: "Especializacao em confeitaria de festa",
+        title: "Curso Sebrae 'Confeitaria como Negócio'",
+        description: "Especialização em confeitaria de festa",
         estimatedTime: "2 meses",
         link: "https://sebrae.com.br",
       },
       {
         order: 3,
         title: "Abra MEI ou ME (avalie volume)",
-        description: "MEI ate R$ 81k/ano. Confeitaria de casamento pode passar disso.",
+        description: "MEI até R$ 81k/ano. Confeitaria de casamento pode passar disso.",
         estimatedTime: "30 min",
         link: "https://gov.br/mei",
       },
       {
         order: 4,
-        title: "Vigilancia sanitaria local",
+        title: "Vigilância sanitária local",
         description:
-          "Producao de alimento exige alvara — Vigilancia Sanitaria de Mariana",
+          "Produção de alimento exige alvará — Vigilância Sanitária de Mariana",
         estimatedTime: "30 dias",
       },
     ],
@@ -482,7 +482,7 @@ const HARDCODED_PADARIA: RawSemente = {
       {
         name: "Banco do Povo MG",
         type: "loan",
-        amount: "ate R$ 21.000",
+        amount: "até R$ 21.000",
         eligibility: "MEI ativo",
       },
       {
@@ -499,7 +499,7 @@ const HARDCODED_MARMITA: RawSemente = {
     title: "Marmitaria pra Trabalhador da Mineradora",
     category: "comercio/alimentacao",
     description:
-      "Producao de marmitas balanceadas pra trabalhadores em turno na Vale.",
+      "Produção de marmitas balanceadas pra trabalhadores em turno na Vale.",
     targetCustomer: "Trabalhadores da mineradora em turnos diurno e noturno",
     estimatedCapex: { min: 8000, max: 18000 },
     estimatedMonthlyRevenue: { min: 5000, max: 14000 },
@@ -510,7 +510,7 @@ const HARDCODED_MARMITA: RawSemente = {
     demandSignal: {
       score: 78,
       evidence:
-        "Categoria com demanda regular: 18 cidadaos mencionaram alimentacao em turno",
+        "Categoria com demanda regular: 18 cidadãos mencionaram alimentação em turno",
       relatedTalents: 18,
     },
     competitionLevel: "low",
@@ -518,7 +518,7 @@ const HARDCODED_MARMITA: RawSemente = {
     localContentMatch: {
       potential: true,
       description:
-        "Vale procura fornecedores certificados de marmita pra refeitorios e turnos remotos. Local content match alto.",
+        "Vale procura fornecedores certificados de marmita pra refeitórios e turnos remotos. Local content match alto.",
     },
   },
   verdict: {
@@ -526,48 +526,48 @@ const HARDCODED_MARMITA: RawSemente = {
     level: "go",
     headline: "Local content match: Vale procura fornecedora certificada.",
     reasoning:
-      "Demanda forte da propria mineradora + competicao baixa. Programa de fornecedores Vale paga adiantado. CAPEX moderado.",
+      "Demanda forte da própria mineradora + competição baixa. Programa de fornecedores Vale paga adiantado. CAPEX moderado.",
   },
   actionPlan: {
     nextSteps: [
       {
         order: 1,
         title: "Abra MEI",
-        description: "Formalizacao gratuita",
+        description: "Formalização gratuita",
         estimatedTime: "15 min",
         link: "https://gov.br/mei",
       },
       {
         order: 2,
         title: "Programa Fornecedor Local Vale",
-        description: "Cadastro como fornecedor de alimentacao pra refeitorios",
+        description: "Cadastro como fornecedor de alimentação pra refeitórios",
         estimatedTime: "2 semanas",
       },
       {
         order: 3,
-        title: "Vigilancia sanitaria + cozinha industrial",
-        description: "Adequacao da cozinha pra padrao mineradora",
-        estimatedTime: "1 mes",
+        title: "Vigilância sanitária + cozinha industrial",
+        description: "Adequação da cozinha pra padrão mineradora",
+        estimatedTime: "1 mês",
       },
       {
         order: 4,
-        title: "Curso Sebrae 'Alimentacao Coletiva'",
-        description: "Especializacao em producao em escala",
+        title: "Curso Sebrae 'Alimentação Coletiva'",
+        description: "Especialização em produção em escala",
         estimatedTime: "2 meses",
         link: "https://sebrae.com.br",
       },
     ],
     fundingOpportunities: [
       {
-        name: "Vale Fundacao · Empreender Mariana",
+        name: "Vale Fundação · Empreender Mariana",
         type: "grant",
-        amount: "ate R$ 5.000",
-        eligibility: "MEI recem-aberto",
+        amount: "até R$ 5.000",
+        eligibility: "MEI recém-aberto",
       },
       {
         name: "Banco do Povo MG",
         type: "loan",
-        amount: "ate R$ 21.000",
+        amount: "até R$ 21.000",
         eligibility: "MEI ativo",
       },
     ],
@@ -575,7 +575,7 @@ const HARDCODED_MARMITA: RawSemente = {
 };
 
 function HARDCODED_GENERICO(rawInput: string): RawSemente {
-  const title = rawInput.slice(0, 60).trim() || "Ideia em analise";
+  const title = rawInput.slice(0, 60).trim() || "Ideia em análise";
   return {
     structured: {
       title,
@@ -599,36 +599,36 @@ function HARDCODED_GENERICO(rawInput: string): RawSemente {
     verdict: {
       score: 60,
       level: "adjust",
-      headline: "Ideia viavel, vale ajustar antes de comecar.",
+      headline: "Ideia viável, vale ajustar antes de começar.",
       reasoning:
-        "Mercado existe mas nao temos sinais fortes de demanda represada. Recomendado validar com 5-10 clientes antes de investir.",
+        "Mercado existe mas não temos sinais fortes de demanda represada. Recomendado validar com 5-10 clientes antes de investir.",
     },
     actionPlan: {
       nextSteps: [
         {
           order: 1,
           title: "Abra MEI online",
-          description: "Formalizacao em 15 min no gov.br",
+          description: "Formalização em 15 min no gov.br",
           estimatedTime: "15 min",
           link: "https://gov.br/mei",
         },
         {
           order: 2,
           title: "Curso Sebrae de empreendedorismo",
-          description: "Capacitacao gratuita em 30h",
-          estimatedTime: "1 mes",
+          description: "Capacitação gratuita em 30h",
+          estimatedTime: "1 mês",
           link: "https://sebrae.com.br",
         },
         {
           order: 3,
-          title: "Validacao com 10 clientes-piloto",
+          title: "Validação com 10 clientes-piloto",
           description: "Teste a ideia antes de comprar equipamento",
           estimatedTime: "2 semanas",
         },
         {
           order: 4,
           title: "Cadastre-se no JAZIDA Marketplace",
-          description: "Apareca pra clientes que ja pediram esse servico",
+          description: "Apareça pra clientes que já pediram esse serviço",
           estimatedTime: "5 min",
         },
       ],

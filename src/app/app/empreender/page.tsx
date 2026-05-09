@@ -22,7 +22,7 @@ import { submitBusinessIdea } from "@/lib/api/citizen";
 import { getStoredAuth } from "@/lib/auth-storage";
 import { getStoredCitizenId } from "@/lib/citizen-storage";
 
-const PLACEHOLDER = `ex: queria abrir uma padaria perto de casa, sei fazer pao
+const PLACEHOLDER = `ex: queria abrir uma padaria perto de casa, sei fazer pão
 ex: tava pensando em vender vestido de noiva, sei costurar
 ex: quero montar uma marmitaria pra trabalhador da Vale`;
 
@@ -44,7 +44,7 @@ export default function EmpreenderPageWrapper() {
 function EmpreenderLoading() {
   return (
     <main className="flex flex-1 items-center justify-center px-5 py-10 mono-s text-solo-tinta-tenue">
-      carregando...
+      carregando…
     </main>
   );
 }
@@ -169,7 +169,7 @@ function FormView(props: {
         </h1>
         <p className="body-l mt-3 text-solo-tinta-suave">
           A equipe de investimento social vai analisar e te retornar pelo
-          whatsapp. Sem julgamento, sem nota.
+          WhatsApp. Sem julgamento, sem nota.
         </p>
       </div>
 
@@ -189,7 +189,7 @@ function FormView(props: {
           aria-disabled
           className="strata-btn strata-btn-outline-solo strata-btn-lg justify-center"
           style={{ opacity: 0.55 }}
-          title="Em breve — gravar audio"
+          title="Em breve — gravar áudio"
         >
           <Icon name="i-mic" size={16} />
           Mandar por voz
@@ -209,7 +209,7 @@ function FormView(props: {
         href="/app"
         className="self-center body-s text-solo-tinta-tenue underline-offset-2 hover:underline"
       >
-        voltar pra inicio
+        voltar pro início
       </Link>
     </>
   );
@@ -226,7 +226,7 @@ function ProcessingView({ text }: { text: string }) {
           className="display-l mt-3 text-solo-tinta"
           style={{ fontSize: 26 }}
         >
-          So um instante...
+          Só um instante…
         </h2>
         <blockquote className="surface-solo mt-4 p-4 body-strata italic text-solo-tinta-suave">
           “{text}”
@@ -264,14 +264,14 @@ function ReceivedView(props: {
         <p className="body-l mt-3 text-solo-tinta-suave">
           A equipe de investimento social da Vale vai analisar e cruzar com
           dados da cidade — demanda local, programas de financiamento, talentos
-          disponiveis. Quando terminarem, te chamam no whatsapp com o retorno
+          disponíveis. Quando terminarem, te chamam no WhatsApp com o retorno
           completo.
         </p>
       </motion.div>
 
       <div className="surface-solo p-5">
         <p className="micro" style={{ color: "var(--solo-tinta-tenue)" }}>
-          O que voce mandou
+          O que você mandou
         </p>
         <p className="body-strata mt-3 italic text-solo-tinta">
           “{props.text}”
@@ -279,22 +279,22 @@ function ReceivedView(props: {
       </div>
 
       <div className="surface-solo border-l-2 border-l-jazida-verde p-5">
-        <p className="micro text-jazida-verde">§ Proximos passos</p>
+        <p className="micro text-jazida-verde">§ Próximos passos</p>
         <ol className="mt-3 flex flex-col gap-3">
           <Step
             order="01"
-            title="Sua ideia entra na fila de analise"
-            note="prazo medio: 5 dias uteis"
+            title="Sua ideia entra na fila de análise"
+            note="prazo médio: 5 dias úteis"
           />
           <Step
             order="02"
             title="Equipe ESG cruza com dados da cidade"
-            note="demanda real, competicao, programas de financiamento"
+            note="demanda real, competição, programas de financiamento"
           />
           <Step
             order="03"
-            title="Voce recebe retorno por whatsapp"
-            note="proximos passos concretos: MEI, Sebrae, capital semente, parcerias"
+            title="Você recebe retorno por WhatsApp"
+            note="próximos passos concretos: MEI, Sebrae, capital semente, parcerias"
           />
         </ol>
       </div>
@@ -305,7 +305,7 @@ function ReceivedView(props: {
           onClick={props.onSeeHistory}
           className="strata-btn strata-btn-primary strata-btn-lg justify-center"
         >
-          Ver minha historia
+          Ver minha história
           <Icon name="i-arr" size={14} />
         </button>
         <button

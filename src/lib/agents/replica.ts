@@ -97,10 +97,10 @@ function fallback(input: ReplicaInput): string {
   const firstName = input.citizen.name.split(" ")[0];
   if (input.trigger === "talent_matched" && input.payload.matches?.length) {
     const m = input.payload.matches[0];
-    return `Oi ${firstName}! Lembra que voce comentou "${input.payload.originalText || "sobre seu sonho"}"? Achei um caminho bom: ${m.title}${m.cost ? ` (${m.cost})` : ""}. Posso te mandar como fazer o pre-cadastro?`;
+    return `Oi ${firstName}! Lembra que você comentou "${input.payload.originalText || "sobre seu sonho"}"? Achei um caminho bom: ${m.title}${m.cost ? ` (${m.cost})` : ""}. Posso te mandar como fazer o pré-cadastro?`;
   }
   if (input.trigger === "complaint_resolved") {
-    return `Oi ${firstName}, passando aqui pra avisar: ${input.payload.action || "tomamos uma providencia sobre o que voce relatou"}. Qualquer coisa, me chama de novo, ta?`;
+    return `Oi ${firstName}, passando aqui pra avisar: ${input.payload.action || "tomamos uma providência sobre o que você relatou"}. Qualquer coisa, me chama de novo, tá?`;
   }
-  return `Oi ${firstName}! Recebi sua mensagem e ja esta sendo cuidada. Em breve te dou retorno por aqui.`;
+  return `Oi ${firstName}! Recebi sua mensagem e já está sendo cuidada. Em breve te dou retorno por aqui.`;
 }

@@ -44,7 +44,7 @@ export default function CitizenHomePage() {
         <div className="flex flex-col items-center gap-3 text-center">
           <Icon name="i-estrato" size={28} className="text-jazida-verde" />
           <span className="mono-s text-solo-tinta-tenue">
-            carregando seu canal...
+            carregando seu canal…
           </span>
         </div>
       </div>
@@ -56,7 +56,7 @@ export default function CitizenHomePage() {
       <header className="flex items-start justify-between gap-4">
         <div>
           <p className="micro" style={{ color: "var(--ferro)" }}>
-            § Inicio {citizenName ? `· ${citizenName}` : ""}
+            § Início {citizenName ? `· ${citizenName}` : ""}
           </p>
           <h1 className="display-l mt-3 text-solo-tinta" style={{ fontSize: 32 }}>
             {citizenName
@@ -64,7 +64,7 @@ export default function CitizenHomePage() {
               : "A gente te ouve."}
           </h1>
           <p className="body-l mt-3 text-solo-tinta-suave">
-            Escolha de onde quer comecar. Sua fala vira sinal classificado, com
+            Escolha de onde quer começar. Sua fala vira sinal classificado, com
             prazo de resposta e protocolo seu.
           </p>
         </div>
@@ -90,22 +90,22 @@ export default function CitizenHomePage() {
           href="/app/empreender"
           icon="i-broto"
           label="§ 02"
-          title="Tenho uma ideia de negocio"
-          subtitle="Conta a ideia. A equipe de investimento social analisa e te retorna pelo whatsapp."
+          title="Tenho uma ideia de negócio"
+          subtitle="Conta a ideia. A equipe de investimento social analisa e te retorna pelo WhatsApp."
         />
         <BigButton
           href="/app/voz"
           icon="i-meg"
           label="§ 03"
           title="Quero reclamar ou sugerir"
-          subtitle="Conta o que ta ruim ou o que pode melhorar. Geramos protocolo e acompanhamos a resposta."
+          subtitle="Conta o que tá ruim ou o que pode melhorar. Geramos protocolo e acompanhamos a resposta."
         />
         <BigButton
           href="/app/historia"
           icon="i-estela"
           label="§ 04"
-          title="Ver minha historia"
-          subtitle="Linha do tempo do que voce ja mandou e o que a Vale fez por causa de voce."
+          title="Ver minha história"
+          subtitle="Linha do tempo do que você já mandou e o que a Vale fez por causa de você."
         />
       </div>
 
@@ -113,7 +113,7 @@ export default function CitizenHomePage() {
 
       <footer className="surface-solo p-4">
         <p className="caption text-solo-tinta-tenue">
-          Lei Geral de Protecao de Dados · art. 7. Sua fala e sua. Nao
+          Lei Geral de Proteção de Dados · art. 7º. Sua fala é sua. Não
           compartilhamos identidade com a mineradora sem seu OK.
         </p>
       </footer>

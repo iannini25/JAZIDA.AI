@@ -74,7 +74,7 @@ export function OpportunitiesPanel() {
           value={`R$ ${(totals?.capexSuggested ?? 0).toLocaleString("pt-BR")}`}
         />
         <Stat
-          label="ja financiadas"
+          label="já financiadas"
           value={totals?.fundedCount ?? 0}
           accent="good"
         />
@@ -89,13 +89,13 @@ export function OpportunitiesPanel() {
 
       {loading && data === null && (
         <p className="rounded-xl border border-dashed border-gray-200 bg-white p-6 text-center text-sm text-text-secondary">
-          carregando oportunidades...
+          carregando oportunidades…
         </p>
       )}
 
       {!loading && data && data.aggregates.length === 0 && (
         <p className="rounded-xl border border-dashed border-gray-200 bg-white p-6 text-center text-sm text-text-secondary">
-          🌱 Nenhuma ideia avaliada ainda. Quando cidadaos enviarem, aparecem aqui.
+          🌱 Nenhuma ideia avaliada ainda. Quando cidadãos enviarem, aparecem aqui.
         </p>
       )}
 
@@ -135,7 +135,7 @@ function CategoryCard({
     aggregate.highFitCount > 0
       ? "🟢 alta-fit"
       : aggregate.pendingIdeasCount > 0
-        ? "🟡 medio-fit"
+        ? "🟡 médio-fit"
         : "—";
   return (
     <motion.article
@@ -202,7 +202,7 @@ function CategoryCard({
           {top.status === "submitted_to_funding"
             ? "✓ Capital semente aprovado"
             : busyId === top.id
-              ? "aprovando..."
+              ? "aprovando…"
               : "Aprovar capital semente"}
         </button>
       )}

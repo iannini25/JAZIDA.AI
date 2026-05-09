@@ -32,7 +32,7 @@ export function registerUser(args: {
     (u) => u.username.toLowerCase() === args.username.toLowerCase()
   );
   if (existing) {
-    throw new Error("Usuario ja existe");
+    throw new Error("Usuário já existe");
   }
 
   if (args.password.length < 4) {
@@ -153,8 +153,8 @@ export function seedDefaultUsers(): void {
   // Cidadaos pre-cadastrados (vinculados aos cidadaos do seed)
   const citizenUsers = [
     { username: "maria", password: "1234", displayName: "Maria Aparecida" },
-    { username: "joao", password: "1234", displayName: "Joao Pedro" },
-    { username: "ana", password: "1234", displayName: "Ana Lucia" },
+    { username: "joao", password: "1234", displayName: "João Pedro" },
+    { username: "ana", password: "1234", displayName: "Ana Lúcia" },
     { username: "carlos", password: "1234", displayName: "Carlos Eduardo" },
     { username: "beatriz", password: "1234", displayName: "Beatriz Oliveira" },
   ];

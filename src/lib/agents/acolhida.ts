@@ -117,7 +117,7 @@ export async function run(input: AcolhidaInput): Promise<AcolhidaOutput> {
     nextAgent,
     responseToCitizen:
       raw.responseToCitizen ||
-      "Oi! Bom te ver por aqui. Conta o que voce quer compartilhar.",
+      "Oi! Bom te ver por aqui. Conta o que você quer compartilhar.",
   };
 }
 
