@@ -1,17 +1,19 @@
-// POST /api/citizens/:id/complaints — registra queixa/sugestao
+// POST /api/citizens/:id/complaints
 //
-// Fase 1 (mock): classifica como complaint generica + protocolo gerado.
-// Fase 2: chama Voz + Pulsar + Vigia.
+// Fluxo:
+//   1) cria Complaint com classificacao placeholder + protocolo
+//   2) chama orchestrator.onComplaintReceived (Voz + Pulsar + Vigia)
+//   3) retorna a Complaint ja classificada + alert (se Vigia disparou)
 
 import {
   db,
-  emitAgentEvent,
   genProtocolNumber,
   newId,
   nowIso,
   saveDb,
 } from "@/lib/db";
 import { badRequest, created, notFound, ok, safeJson } from "@/lib/http";
+import { onComplaintReceived } from "@/lib/orchestrator";
 import type { Complaint } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +21,7 @@ export const dynamic = "force-dynamic";
 type Body = {
   rawInput?: string;
   type?: "complaint" | "suggestion";
+  photoUrl?: string;
 };
 
 export async function POST(
@@ -33,13 +36,14 @@ export async function POST(
     return badRequest("campo 'rawInput' obrigatorio");
   }
 
-  const type = body.type === "suggestion" ? "suggestion" : "complaint";
+  const placeholderType =
+    body.type === "suggestion" ? "suggestion" : "complaint";
 
   const complaint: Complaint = {
     id: newId(),
     citizenId: citizen.id,
     rawInput: body.rawInput,
-    type,
+    type: placeholderType,
     classification: {
       category: "outro",
       urgency: "medium",
@@ -53,16 +57,15 @@ export async function POST(
   db.complaints.push(complaint);
   saveDb();
 
-  emitAgentEvent({
-    id: newId(),
-    agentName: "Voz",
-    citizenId: citizen.id,
-    action: `Recebeu ${type}: "${body.rawInput.slice(0, 60)}"`,
-    payload: { complaintId: complaint.id, phase: "mock" },
-    timestamp: nowIso(),
+  // Sincrono pra retornar a complaint ja classificada (Voz e rapido — 1 LLM call)
+  const { alert } = await onComplaintReceived({
+    citizen,
+    complaint,
+    rawInput: body.rawInput,
+    photoUrl: body.photoUrl,
   });
 
-  return created(complaint);
+  return created({ complaint, alert: alert ?? null });
 }
 
 export async function GET(

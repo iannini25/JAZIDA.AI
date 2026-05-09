@@ -1,22 +1,31 @@
 // POST /api/demo/trigger/:scenario — dispara cenario de demo
 //
-// Cenarios (do master):
-//   - maria_enfermagem: Talento + Bussola + Replica
-//   - joaozinho_poeira: Voz + Pulsar + Vigia (Vigia entrega via Alert)
+// Cenarios (master):
+//   - maria_enfermagem: roda Acolhida -> Talento -> Bussola -> Replica
+//   - joaozinho_poeira: roda Voz -> Pulsar -> Vigia (entrega via Alert)
 //
-// Fase 1 (mock): cria/recupera cidadao + emite eventos representativos.
-// Fase 3: cadeia completa de agents reais.
+// Em ambos os modos, tudo passa pelo orchestrator que registra agentEvents
+// no DB — entao o feed live do dashboard mostra a cadeia em tempo real.
 
 import {
   db,
-  emitAgentEvent,
   genProtocolNumber,
   newId,
   nowIso,
   saveDb,
 } from "@/lib/db";
 import { badRequest, ok } from "@/lib/http";
-import type { Alert, Citizen, Complaint, DemoScenario } from "@/types";
+import {
+  generateReplica,
+  onComplaintReceived,
+  onTalentReceived,
+} from "@/lib/orchestrator";
+import type {
+  Citizen,
+  Complaint,
+  DemoScenario,
+  TalentEntry,
+} from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -33,14 +42,11 @@ export async function POST(
     );
   }
 
-  if (scenario === "maria_enfermagem") return ok(triggerMaria());
-  return ok(triggerJoao());
+  if (scenario === "maria_enfermagem") return ok(await triggerMaria());
+  return ok(await triggerJoao());
 }
 
-function ensureCitizen(
-  name: string,
-  fields: Partial<Citizen>
-): Citizen {
+function ensureCitizen(name: string, fields: Partial<Citizen>): Citizen {
   const existing = db.citizens.find((c) => c.name === name);
   if (existing) return existing;
   const novo: Citizen = {
@@ -55,7 +61,10 @@ function ensureCitizen(
   return novo;
 }
 
-function triggerMaria() {
+// ──────────────────────────────────────────────────────────
+// Maria — Talento + Bussola + Replica
+// ──────────────────────────────────────────────────────────
+async function triggerMaria() {
   const maria = ensureCitizen("Maria Aparecida", {
     age: 47,
     neighborhood: "Santo Antonio",
@@ -63,53 +72,65 @@ function triggerMaria() {
     phone: "+5531999990001",
   });
 
-  const eventIds: string[] = [];
-  const push = (e: Parameters<typeof emitAgentEvent>[0]) => {
-    emitAgentEvent(e);
-    eventIds.push(e.id);
-  };
+  const rawInput =
+    "alo, queria saber se minha filha de 17 anos consegue uma bolsa pra estudar enfermagem";
 
-  push({
+  const talent: TalentEntry = {
     id: newId(),
-    agentName: "Acolhida",
     citizenId: maria.id,
-    action: "Primeiro contato: identificou intent=talento (filha 17 anos)",
-    timestamp: nowIso(),
-  });
-  push({
-    id: newId(),
-    agentName: "Talento",
-    citizenId: maria.id,
-    action:
-      "Estruturou aspiracao: enfermagem (saude, conf 0.92) — para filha de 17",
-    timestamp: nowIso(),
-  });
-  push({
-    id: newId(),
-    agentName: "Bussola",
-    citizenId: maria.id,
-    action:
-      "3 matches: SENAI Mariana, Hospital Monsenhor Horta, Sebrae Saude Domiciliar",
-    timestamp: nowIso(),
-  });
-  push({
-    id: newId(),
-    agentName: "Replica",
-    citizenId: maria.id,
-    action:
-      'Draft pronto: "Maria, achei 3 caminhos pra sua filha. A Vale Fundacao tem bolsa pro tecnico SENAI - quer que eu ja faca pre-cadastro?"',
-    timestamp: nowIso(),
+    rawInput,
+    type: "aspiration",
+    structured: { label: rawInput.slice(0, 40), category: "outro", confidence: 0 },
+    createdAt: nowIso(),
+  };
+  db.talents.push(talent);
+  saveDb();
+
+  // Roda Talento + Bussola (sincrono pra demo retornar dados completos)
+  await onTalentReceived({ citizen: maria, talent, rawInput });
+
+  // Espera bussola completar (await curto + polling — onTalentReceived dispara
+  // bussola void, entao precisamos esperar matches aparecer ou timeout)
+  await waitForMatches(talent.id, 10_000);
+
+  // Gera Replica
+  const replicaText = await generateReplica({
+    trigger: "talent_matched",
+    citizen: maria,
+    payload: {
+      originalText: rawInput,
+      matches: (talent.matches || []).slice(0, 3).map((m) => ({
+        title: m.title,
+        cost: m.cost,
+      })),
+    },
   });
 
   return {
     scenario: "maria_enfermagem" as const,
     citizenId: maria.id,
-    eventIds,
-    note: "Fase 1: eventos mock. Fase 3 plugara agents reais.",
+    talent,
+    replicaDraft: replicaText,
+    note: "Cadeia real: Talento + Bussola + Replica.",
   };
 }
 
-function triggerJoao() {
+async function waitForMatches(
+  talentId: string,
+  timeoutMs: number
+): Promise<void> {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    const t = db.talents.find((x) => x.id === talentId);
+    if (t?.matches && t.matches.length > 0) return;
+    await new Promise((r) => setTimeout(r, 200));
+  }
+}
+
+// ──────────────────────────────────────────────────────────
+// Joao — Voz + Pulsar + Vigia
+// ──────────────────────────────────────────────────────────
+async function triggerJoao() {
   const joao = ensureCitizen("Joao Pedro Silva", {
     age: 38,
     neighborhood: "Centro",
@@ -117,82 +138,38 @@ function triggerJoao() {
     phone: "+5531999990002",
   });
 
-  // Adiciona uma queixa NOVA pro cenario disparar (alem das do seed)
-  const novaQueixa: Complaint = {
+  const rawInput =
+    "o, esse po ta insuportavel, nao da pra deixar o carro na rua";
+
+  const complaint: Complaint = {
     id: newId(),
     citizenId: joao.id,
-    rawInput:
-      "o, esse po ta insuportavel hoje, nao da pra deixar o carro na rua",
+    rawInput,
     type: "complaint",
     classification: {
-      category: "ar/poeira",
+      category: "outro",
       urgency: "medium",
-      impact: "collective",
-      neighborhood: "Centro",
+      impact: "individual",
+      neighborhood: joao.neighborhood,
     },
     protocolNumber: genProtocolNumber(),
     status: "open",
     createdAt: nowIso(),
   };
-  db.complaints.push(novaQueixa);
-
-  // Alerta novo do Vigia (entregue via Alert do dashboard)
-  const novoAlerta: Alert = {
-    id: newId(),
-    level: "alert",
-    title: "ATENCAO Centro — poeira escalando",
-    description:
-      "8a queixa de poeira no Centro essa semana (+40% vs base). Risco reputacional crescente.",
-    recommendedAction:
-      "Agendar reuniao com associacao do bairro em 48h e acionar molhagem reforcada das vias.",
-    createdAt: nowIso(),
-  };
-  db.alerts.push(novoAlerta);
+  db.complaints.push(complaint);
   saveDb();
 
-  const eventIds: string[] = [];
-  const push = (e: Parameters<typeof emitAgentEvent>[0]) => {
-    emitAgentEvent(e);
-    eventIds.push(e.id);
-  };
-
-  push({
-    id: newId(),
-    agentName: "Voz",
-    citizenId: joao.id,
-    action:
-      "Classificou queixa: ar/poeira, urgencia media, Centro (foto + texto)",
-    payload: { complaintId: novaQueixa.id },
-    timestamp: nowIso(),
-  });
-  push({
-    id: newId(),
-    agentName: "Pulsar",
-    action: "Tema 'ar/poeira' subiu 40% no Centro (8 sinais em 24h)",
-    payload: {
-      theme: "ar/poeira",
-      neighborhood: "Centro",
-      deltaPct: 40,
-    },
-    timestamp: nowIso(),
-  });
-  // Vigia conceitual — dispara via Alert (nao tem agentName proprio)
-  // Logamos como Pulsar pq Vigia roda em cima do Pulsar
-  push({
-    id: newId(),
-    agentName: "Pulsar",
-    action:
-      "ALERTA gerado para dashboard: Centro com risco reputacional crescente",
-    payload: { alertId: novoAlerta.id, level: "alert" },
-    timestamp: nowIso(),
+  const { alert } = await onComplaintReceived({
+    citizen: joao,
+    complaint,
+    rawInput,
   });
 
   return {
     scenario: "joaozinho_poeira" as const,
     citizenId: joao.id,
-    complaintId: novaQueixa.id,
-    alertId: novoAlerta.id,
-    eventIds,
-    note: "Fase 1: eventos mock + queixa + alerta reais no DB.",
+    complaint,
+    alert: alert ?? null,
+    note: "Cadeia real: Voz + Pulsar + Vigia.",
   };
 }

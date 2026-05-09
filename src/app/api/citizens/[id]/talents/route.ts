@@ -1,13 +1,18 @@
-// POST /api/citizens/:id/talents — registra talento
+// POST /api/citizens/:id/talents
 //
-// Fase 1 (mock): cria entry com structured/matches placeholder.
-// Fase 2: chama agent Talento + dispara Bussola assincrono.
+// Fluxo:
+//   1) cria TalentEntry placeholder com status "processing" (UX)
+//   2) responde 202 com { talentId, status: "processing" } imediato
+//   3) em background: orchestrator.onTalentReceived
+//        -> Talento popula structured/type
+//        -> Bussola popula matches[] async
 //
-// Resposta retorna 202 com `{ talentId, status: "processing" }` para que
-// o frontend possa fazer polling/SSE enquanto a Bussola gera os matches.
+// O frontend faz polling em GET /talents ou escuta SSE pra ver os matches
+// chegando.
 
-import { db, emitAgentEvent, newId, nowIso, saveDb } from "@/lib/db";
+import { db, newId, nowIso, saveDb } from "@/lib/db";
 import { badRequest, notFound, ok, safeJson } from "@/lib/http";
+import { onTalentReceived } from "@/lib/orchestrator";
 import type { TalentEntry, TalentType } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -33,42 +38,33 @@ export async function POST(
     return badRequest("campo 'rawInput' obrigatorio");
   }
 
-  const type: TalentType = TALENT_TYPES.includes(body.type as TalentType)
+  const fallbackType: TalentType = TALENT_TYPES.includes(
+    body.type as TalentType
+  )
     ? (body.type as TalentType)
     : "aspiration";
 
-  // Fase 1 mock — Fase 2 sobrescreve com chamada real ao agent Talento
   const talent: TalentEntry = {
     id: newId(),
     citizenId: citizen.id,
     rawInput: body.rawInput,
-    type,
+    type: fallbackType,
     structured: {
       label: body.rawInput.slice(0, 40),
       category: "outro",
-      confidence: 0.5,
+      confidence: 0,
     },
     createdAt: nowIso(),
   };
   db.talents.push(talent);
   saveDb();
 
-  emitAgentEvent({
-    id: newId(),
-    agentName: "Talento",
-    citizenId: citizen.id,
-    action: `Recebeu input: "${body.rawInput.slice(0, 60)}"`,
-    payload: { talentId: talent.id, phase: "mock" },
-    timestamp: nowIso(),
-  });
+  // Async — nao bloqueia. Erros sao logados, talent fica com placeholder.
+  void onTalentReceived({ citizen, talent, rawInput: body.rawInput });
 
-  return ok(
-    { talentId: talent.id, status: "processing" },
-    { status: 202 }
-  );
+  return ok({ talentId: talent.id, status: "processing" }, { status: 202 });
 }
 
-// GET /api/citizens/:id/talents — lista talentos
 export async function GET(
   _req: Request,
   ctx: { params: { id: string } }
