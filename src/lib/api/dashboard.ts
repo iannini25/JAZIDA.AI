@@ -4,11 +4,13 @@
 import type {
   Alert,
   AgentEvent,
+  BusinessIdea,
   Citizen,
   CitizenHistory,
   CityId,
   ESGFramework,
   ESGReportFragment,
+  OpportunityAggregate,
   ReplicaMessage,
   SentimentSnapshot,
 } from "@/types";
@@ -197,9 +199,44 @@ export async function generateEsgReport(opts: {
 }
 
 // ──────────────────────────────────────────────────────────
+// Oportunidades (Semente / just transition)
+// ──────────────────────────────────────────────────────────
+export type OpportunitiesResponse = {
+  aggregates: OpportunityAggregate[];
+  totals: {
+    ideasAnalyzed: number;
+    highFitTotal: number;
+    capexSuggested: number;
+    fundedCount: number;
+  };
+};
+
+export async function getOpportunities(): Promise<OpportunitiesResponse> {
+  const res = await fetch(url(`/api/dashboard/opportunities`), {
+    cache: "no-store",
+  });
+  return jsonOrThrow<OpportunitiesResponse>(res);
+}
+
+export async function fundOpportunity(ideaId: string): Promise<{
+  ideaId: string;
+  status: string;
+  funded: boolean;
+}> {
+  const res = await fetch(
+    url(`/api/dashboard/opportunities/${ideaId}/fund`),
+    { method: "POST", cache: "no-store" }
+  );
+  return jsonOrThrow(res);
+}
+
+// ──────────────────────────────────────────────────────────
 // Demo triggers (consumido pelo widget de live demo)
 // ──────────────────────────────────────────────────────────
-export type DemoScenarioId = "maria_enfermagem" | "joaozinho_poeira";
+export type DemoScenarioId =
+  | "maria_enfermagem"
+  | "joaozinho_poeira"
+  | "beatriz_costura";
 
 export async function triggerDemoScenario(
   scenario: DemoScenarioId

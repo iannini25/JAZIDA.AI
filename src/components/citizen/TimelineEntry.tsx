@@ -12,7 +12,65 @@ export type TimelineEntryProps = { entry: HistoryItem };
 export function TimelineEntry({ entry }: TimelineEntryProps) {
   if (entry.kind === "talent") return <TalentItem talent={entry.data} />;
   if (entry.kind === "complaint") return <ComplaintItem complaint={entry.data} />;
+  if (entry.kind === "idea") return <IdeaItem idea={entry.data} />;
   return <ReplicaItem replica={entry.data} />;
+}
+
+function IdeaItem({
+  idea,
+}: {
+  idea: Extract<HistoryItem, { kind: "idea" }>["data"];
+}) {
+  const verdictMeta: Record<
+    typeof idea.verdict.level,
+    { emoji: string; chip: string }
+  > = {
+    go: { emoji: "🟢", chip: "bg-emerald-100 text-emerald-800" },
+    adjust: { emoji: "🟡", chip: "bg-amber-100 text-amber-800" },
+    pivot: { emoji: "🔴", chip: "bg-red-100 text-red-800" },
+  };
+  const meta = verdictMeta[idea.verdict.level];
+  return (
+    <article className="rounded-2xl border border-gray-200 bg-white p-4">
+      <header className="flex items-center justify-between gap-2 text-xs text-text-secondary">
+        <span className="flex items-center gap-2">
+          <span className="text-base" aria-hidden>
+            💡
+          </span>
+          <span>Ideia · {dateLabel(idea.createdAt)}</span>
+        </span>
+        <span
+          className={cn(
+            "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+            meta.chip
+          )}
+        >
+          {meta.emoji} {idea.verdict.score}/100
+        </span>
+      </header>
+      <p className="mt-2 text-sm font-semibold text-text-primary">
+        {idea.structured.title}
+      </p>
+      <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+        “{idea.rawInput.slice(0, 140)}{idea.rawInput.length > 140 ? "..." : ""}”
+      </p>
+      <p className="mt-2 text-xs text-text-primary">
+        {idea.verdict.headline}
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2 text-xs text-text-secondary">
+        <span className="rounded-md bg-gray-100 px-2 py-0.5">
+          {idea.structured.category}
+        </span>
+        <span className="rounded-md bg-gray-100 px-2 py-0.5">
+          {idea.structured.suggestedLegalForm}
+        </span>
+        <span className="rounded-md bg-gray-100 px-2 py-0.5">
+          R$ {idea.structured.estimatedCapex.min.toLocaleString("pt-BR")}–
+          {idea.structured.estimatedCapex.max.toLocaleString("pt-BR")}
+        </span>
+      </div>
+    </article>
+  );
 }
 
 function dateLabel(iso: string): string {

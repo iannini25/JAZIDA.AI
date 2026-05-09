@@ -22,6 +22,9 @@ export async function GET(
     ...db.replicas
       .filter((r) => r.citizenId === ctx.params.id)
       .map<HistoryItem>((data) => ({ kind: "replica", data })),
+    ...db.businessIdeas
+      .filter((i) => i.citizenId === ctx.params.id)
+      .map<HistoryItem>((data) => ({ kind: "idea", data })),
   ].sort((a, b) => {
     const da = new Date(a.data.createdAt).getTime();
     const db2 = new Date(b.data.createdAt).getTime();

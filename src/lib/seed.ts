@@ -9,6 +9,7 @@ import {
   nowIso,
   saveDb,
 } from "@/lib/db";
+import { seedDefaultUsers } from "@/lib/auth";
 import type {
   Alert,
   Citizen,
@@ -238,6 +239,109 @@ export function runSeed(): {
     complaintCarlos
   );
 
+  // ──────────────────────────────────────────────────────────
+  // Sinais represados de costura/vestido — 47 talents/queixas
+  // distribuidas em ~32 cidadaos sinteticos pra alimentar o agente Semente.
+  // Quando Beatriz roda Semente, demandSignal.relatedTalents>=47 e nenhuma
+  // ideia na categoria moda/costura ja foi cadastrada.
+  // ──────────────────────────────────────────────────────────
+  const SYNTHETIC_FIRST_NAMES = [
+    "Joana", "Patricia", "Cibele", "Roseli", "Marlene", "Sueli", "Rita",
+    "Vanessa", "Tatiane", "Eliane", "Juliana", "Mariana", "Camila",
+    "Larissa", "Bruna", "Renata", "Cristina", "Sandra", "Andrea", "Fatima",
+    "Lucia", "Paula", "Carolina", "Adriana", "Daniela", "Fabiola",
+    "Helena", "Iara", "Jacira", "Kelly", "Leticia", "Natalia",
+  ];
+  const SYNTHETIC_LASTS = [
+    "Silva", "Pereira", "Costa", "Oliveira", "Souza", "Ferreira", "Almeida",
+    "Lima", "Ribeiro", "Carvalho",
+  ];
+  const COSTURA_TALENT_PHRASES = [
+    "queria contratar uma costureira pra fazer meu vestido de noiva",
+    "minha filha vai casar e nao acho costureira boa em Mariana",
+    "preciso de alta-costura pra formatura, ninguem oferece aqui",
+    "queria que tivesse uma loja de vestido sob medida no centro",
+    "sou madrinha e nao tem onde fazer vestido em Mariana",
+    "procuro costureira de festa, todo mundo manda pra Belo Horizonte",
+    "queria aprender costura, mas tambem preciso achar uma boa pra mim",
+    "preciso de reforma de vestido de festa, nao acho ninguem",
+    "precisava de um vestido de noiva e tive que ir pra Ouro Preto",
+    "a cidade nao tem ninguem que faca vestido de daminha",
+  ];
+  const COSTURA_COMPLAINT_PHRASES = [
+    "Mariana nao tem costureira boa, todo mundo paga frete pra Belo Horizonte",
+    "falta servico de costura sob medida no comercio local",
+    "minha vizinha cobra caro porque nao tem concorrencia em costura",
+  ];
+
+  const syntheticCitizens: Citizen[] = [];
+  for (let i = 0; i < 32; i++) {
+    const first =
+      SYNTHETIC_FIRST_NAMES[i % SYNTHETIC_FIRST_NAMES.length];
+    const last = SYNTHETIC_LASTS[i % SYNTHETIC_LASTS.length];
+    const c = makeCitizen(`${first} ${last}`, {
+      age: 25 + (i % 40),
+      neighborhood:
+        ["Centro", "Cabanas", "Santa Cruz", "Passagem", "Santo Antonio"][
+          i % 5
+        ],
+      occupation: ["Comerciante", "Professora", "Estudante", "Dona de casa"][
+        i % 4
+      ],
+      phone: `+55319999900${(10 + i).toString().padStart(2, "0")}`,
+    });
+    syntheticCitizens.push(c);
+  }
+  db.citizens.push(...syntheticCitizens);
+
+  const costuraTalents: TalentEntry[] = [];
+  // 38 talents (aspiration "ter costureira" / serviço necessário)
+  for (let i = 0; i < 38; i++) {
+    const c = syntheticCitizens[i % syntheticCitizens.length];
+    const phrase =
+      COSTURA_TALENT_PHRASES[i % COSTURA_TALENT_PHRASES.length];
+    costuraTalents.push({
+      id: newId(),
+      citizenId: c.id,
+      rawInput: phrase,
+      type: "want_to_learn",
+      structured: {
+        label: ["vestido sob medida", "costureira", "alta-costura", "vestido de noiva"][
+          i % 4
+        ],
+        category: "moda/costura",
+        confidence: 0.85,
+      },
+      createdAt: nowIso(),
+    });
+  }
+  db.talents.push(...costuraTalents);
+
+  // 9 complaints (servico em falta)
+  const costuraComplaints: Complaint[] = [];
+  for (let i = 0; i < 9; i++) {
+    const c = syntheticCitizens[(i + 7) % syntheticCitizens.length];
+    costuraComplaints.push({
+      id: newId(),
+      citizenId: c.id,
+      rawInput:
+        COSTURA_COMPLAINT_PHRASES[i % COSTURA_COMPLAINT_PHRASES.length],
+      type: "suggestion",
+      classification: {
+        category: "comercio",
+        urgency: "low",
+        impact: "collective",
+        neighborhood: c.neighborhood,
+      },
+      protocolNumber: genProtocolNumber(),
+      status: "open",
+      createdAt: nowIso(),
+    });
+  }
+  db.complaints.push(...costuraComplaints);
+
+  // Total de sinais costura/vestido: 38 + 9 = 47 ✓
+
   // Alerta inicial do Vigia (master nao tem 'vigia' como agentName,
   // entao o alerta vai como Alert do dashboard com level=alert)
   const alertPoeira: Alert = {
@@ -286,6 +390,9 @@ export function runSeed(): {
   });
 
   saveDb();
+
+  // Cria usuarios padrao vinculados aos cidadaos
+  seedDefaultUsers();
 
   return {
     citizens: db.citizens,

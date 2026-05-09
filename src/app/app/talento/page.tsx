@@ -6,7 +6,9 @@
 //  1) form: pergunta + textarea + botoes (voz / texto)
 //  2) submit -> POST /talents -> mostra <AgentCascade> animando
 //  3) polling em /talents ate matches aparecerem
-//  4) renderiza <MatchCard /> x N
+//  4) Se matches aprovados -> renderiza <MatchCard /> x N
+//     Se matches pendentes -> mostra aviso de "aguardando aprovacao"
+//  5) Rate limit: informa quantos pedidos restam na janela
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -18,17 +20,16 @@ import { AppHeader } from "@/components/citizen/AppHeader";
 import {
   addTalent,
   pollForMatches,
-  seedDemo,
-  listCitizens,
 } from "@/lib/api/citizen";
+import { getRateLimit } from "@/lib/api/auth";
 import {
   getStoredCitizenId,
   getStoredCitizenName,
-  setStoredCitizen,
 } from "@/lib/citizen-storage";
+import { getStoredAuth } from "@/lib/auth-storage";
 import type { BussolaMatch, TalentEntry } from "@/types";
 
-type ViewState = "form" | "processing" | "matches" | "error";
+type ViewState = "form" | "processing" | "matches" | "pending_approval" | "error";
 
 const PLACEHOLDER = `ex: queria estudar enfermagem
 ex: sei costurar vestido de noiva ha 30 anos
@@ -68,42 +69,27 @@ function TalentoPage() {
   const [matches, setMatches] = useState<BussolaMatch[]>([]);
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [remaining, setRemaining] = useState<number | null>(null);
 
-  // Bootstrap: pega ID do localStorage; se nao tiver, tenta achar Maria via dashboard
   useEffect(() => {
-    let cancelled = false;
-    async function boot() {
-      const stored = getStoredCitizenId();
-      if (stored) {
-        if (!cancelled) {
-          setCitizenId(stored);
-          setCitizenName(getStoredCitizenName() || "");
-        }
-        return;
-      }
-      // Sem cidadao no localStorage — tenta usar Maria do seed
-      try {
-        await seedDemo();
-        const { citizens } = await listCitizens();
-        const maria =
-          citizens.find((c) => c.name.toLowerCase().includes("maria")) ||
-          citizens[0];
-        if (maria) {
-          setStoredCitizen(maria.id, maria.name);
-          if (!cancelled) {
-            setCitizenId(maria.id);
-            setCitizenName(maria.name.split(" ")[0]);
-          }
-        }
-      } catch (err) {
-        console.error("[talento] bootstrap falhou:", err);
-      }
+    const auth = getStoredAuth();
+    if (!auth) {
+      router.replace("/");
+      return;
     }
-    void boot();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    if (auth.citizenId) {
+      setCitizenId(auth.citizenId);
+    } else {
+      const stored = getStoredCitizenId();
+      if (stored) setCitizenId(stored);
+    }
+    setCitizenName(auth.displayName.split(" ")[0] || getStoredCitizenName() || "");
+
+    // Busca rate limit
+    getRateLimit("talent").then((info) => {
+      if (info) setRemaining(info.remaining + 1); // +1 porque remaining e "apos uso"
+    }).catch(() => {});
+  }, [router]);
 
   const greeting = useMemo(
     () => (citizenName ? `Bora, ${citizenName}!` : "Bora?"),
@@ -118,9 +104,28 @@ function TalentoPage() {
     setErrorMessage("");
     try {
       const { talentId } = await addTalent(citizenId, trimmed);
-      const final: TalentEntry = await pollForMatches(citizenId, talentId);
-      setMatches(final.matches ?? []);
-      setView("matches");
+
+      // Tenta pegar matches (polling)
+      try {
+        const final: TalentEntry = await pollForMatches(citizenId, talentId);
+        const approvalStatus = final.matchApprovalStatus || "pending";
+
+        if (approvalStatus === "approved" && final.matches && final.matches.length > 0) {
+          setMatches(final.matches);
+          setView("matches");
+        } else {
+          // Matches existem mas estao pendentes de aprovacao
+          setView("pending_approval");
+        }
+      } catch {
+        // Timeout de polling — matches ainda nao chegaram, mostrar pendente
+        setView("pending_approval");
+      }
+
+      // Atualiza rate limit
+      getRateLimit("talent").then((info) => {
+        if (info) setRemaining(info.remaining + 1);
+      }).catch(() => {});
     } catch (err) {
       console.error("[talento] erro:", err);
       setErrorMessage(
@@ -134,8 +139,6 @@ function TalentoPage() {
 
   function handleSelectMatch(m: BussolaMatch) {
     setSelectedTitle(m.title);
-    // Em producao, registra interesse via endpoint dedicado.
-    // Aqui o "select" e visual + handoff pra historia.
   }
 
   return (
@@ -149,14 +152,25 @@ function TalentoPage() {
             setText={setText}
             onSubmit={handleSubmit}
             disabled={!citizenId || !text.trim()}
+            remaining={remaining}
           />
         )}
 
         {view === "processing" && (
           <ProcessingView
             text={text}
-            onComplete={() => {
-              // espera matches; quando eles caem, view muda pra 'matches'
+            onComplete={() => {}}
+          />
+        )}
+
+        {view === "pending_approval" && (
+          <PendingApprovalView
+            citizenName={citizenName}
+            text={text}
+            onSeeHistory={() => router.push("/app/historia")}
+            onRestart={() => {
+              setText("");
+              setView("form");
             }}
           />
         )}
@@ -197,6 +211,7 @@ function FormView(props: {
   setText: (v: string) => void;
   onSubmit: () => void;
   disabled: boolean;
+  remaining: number | null;
 }) {
   return (
     <>
@@ -216,6 +231,12 @@ function FormView(props: {
           Manda ver — pode ser por texto ou por voz. To aqui contigo.
         </p>
       </div>
+
+      {props.remaining !== null && (
+        <div className="rounded-xl bg-brand-bg px-3 py-2 text-xs text-text-secondary">
+          Voce pode enviar mais <strong className="text-text-primary">{props.remaining}</strong> talento(s) nesta hora.
+        </div>
+      )}
 
       <textarea
         value={props.text}
@@ -238,7 +259,7 @@ function FormView(props: {
         <button
           type="button"
           onClick={props.onSubmit}
-          disabled={props.disabled}
+          disabled={props.disabled || props.remaining === 0}
           className="flex min-h-[56px] items-center justify-center gap-2 rounded-2xl bg-brand-green px-4 text-base font-semibold text-white transition-transform active:scale-[0.98] disabled:opacity-50"
         >
           ✏️ Mandar
@@ -278,7 +299,7 @@ function ProcessingView({
           So um instante...
         </h2>
         <blockquote className="mt-3 rounded-2xl bg-brand-bg p-4 text-sm italic text-text-primary">
-          “{text}”
+          "{text}"
         </blockquote>
       </div>
       <AgentCascade steps={CASCADE_STEPS} stepDelayMs={900} onComplete={onComplete} />
@@ -287,7 +308,76 @@ function ProcessingView({
 }
 
 // ──────────────────────────────────────────────────────────
-// Matches
+// Pending Approval — matches gerados mas aguardando OK da mineradora
+// ──────────────────────────────────────────────────────────
+function PendingApprovalView(props: {
+  citizenName: string;
+  text: string;
+  onSeeHistory: () => void;
+  onRestart: () => void;
+}) {
+  return (
+    <>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <p className="text-xs uppercase tracking-wider text-brand-green">
+          Recebido
+        </p>
+        <h2
+          className="mt-1 text-xl font-bold text-text-primary"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {props.citizenName
+            ? `Beleza, ${props.citizenName}!`
+            : "Beleza!"}
+        </h2>
+        <p className="mt-2 text-sm text-text-secondary">
+          A equipe da mineradora vai analisar as recomendacoes que a Bussola
+          encontrou pra "{shortQuote(props.text)}".
+        </p>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="rounded-2xl border-2 border-amber-200 bg-amber-50 p-4"
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-xl">⏳</span>
+          <div>
+            <p className="text-sm font-semibold text-amber-800">
+              Aguardando aprovacao
+            </p>
+            <p className="text-xs text-amber-700">
+              As recomendacoes precisam ser validadas pela equipe antes de
+              aparecerem pra voce. Voce sera notificado quando estiver pronto.
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
+      <div className="mt-2 flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={props.onSeeHistory}
+          className="flex min-h-[52px] items-center justify-center rounded-2xl border-2 border-brand-green text-base font-semibold text-brand-green hover:bg-brand-green hover:text-white"
+        >
+          Ver minha historia
+        </button>
+        <button
+          type="button"
+          onClick={props.onRestart}
+          className="flex min-h-[44px] items-center justify-center text-sm text-text-secondary underline-offset-2 hover:underline"
+        >
+          mandar outro talento
+        </button>
+      </div>
+    </>
+  );
+}
+
+// ──────────────────────────────────────────────────────────
+// Matches (so aparece apos aprovacao no dashboard)
 // ──────────────────────────────────────────────────────────
 function MatchesView(props: {
   citizenName: string;
@@ -311,8 +401,8 @@ function MatchesView(props: {
           {props.citizenName ? `Olha so, ${props.citizenName}.` : "Olha so."}
         </h2>
         <p className="mt-1 text-sm text-text-secondary">
-          A gente cruzou “{shortQuote(props.text)}” com programas reais aqui em
-          Mariana.
+          A gente cruzou "{shortQuote(props.text)}" com programas reais aqui em
+          Mariana. Aprovado pela equipe da mineradora.
         </p>
       </motion.div>
 

@@ -257,6 +257,41 @@ function TimelineRow({ item }: { item: HistoryItem }) {
       </div>
     );
   }
+  if (item.kind === "idea") {
+    const i = item.data;
+    const verdictChip =
+      i.verdict.level === "go"
+        ? "bg-emerald-100 text-emerald-800"
+        : i.verdict.level === "adjust"
+          ? "bg-amber-100 text-amber-800"
+          : "bg-red-100 text-red-800";
+    const verdictEmoji =
+      i.verdict.level === "go"
+        ? "🟢"
+        : i.verdict.level === "adjust"
+          ? "🟡"
+          : "🔴";
+    return (
+      <div className="rounded-md border border-lime-100 bg-lime-50/40 p-2 text-xs">
+        <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-lime-700">
+          <span>🌱 ideia</span>
+          <span>{format(new Date(i.createdAt), "dd/MM HH:mm")}</span>
+          <span
+            className={`ml-auto rounded-full px-1.5 py-0.5 text-[9px] font-bold ${verdictChip}`}
+          >
+            {verdictEmoji} {i.verdict.score}/100
+          </span>
+        </div>
+        <p className="mt-1 font-semibold text-text-primary">
+          {i.structured.title}
+        </p>
+        <p className="mt-1 line-clamp-2 text-[10px] text-text-secondary">
+          {i.verdict.headline}
+        </p>
+      </div>
+    );
+  }
+  // replica
   const r = item.data;
   return (
     <div className="rounded-md border border-emerald-100 bg-emerald-50/40 p-2 text-xs">

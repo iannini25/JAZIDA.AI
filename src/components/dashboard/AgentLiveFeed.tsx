@@ -24,6 +24,7 @@ const AGENT_THEME: Record<
   Replica: { bg: "bg-violet-100", ring: "ring-violet-200", initial: "R" },
   Pulsar: { bg: "bg-amber-100", ring: "ring-amber-200", initial: "P" },
   Pacto: { bg: "bg-indigo-100", ring: "ring-indigo-200", initial: "P" },
+  Semente: { bg: "bg-lime-100", ring: "ring-lime-200", initial: "🌱" },
 };
 
 export type AgentLiveFeedProps = {

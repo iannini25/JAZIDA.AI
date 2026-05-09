@@ -98,6 +98,13 @@ type Metrics = {
   openAlerts: number;
   recentProtocols: string[];
   alertSummaries: { id: string; level: string; title: string; rec: string }[];
+  // Just Transition (Semente)
+  totalIdeas: number;
+  highFitIdeas: number;
+  fundedIdeas: number;
+  capexCommittedMin: number;
+  capexCommittedMax: number;
+  topCategories: string[];
 };
 
 function collectMetrics(cityId: CityId): Metrics {
@@ -129,6 +136,34 @@ function collectMetrics(cityId: CityId): Metrics {
     title: a.title,
     rec: a.recommendedAction,
   }));
+
+  // Just Transition (Semente)
+  const cityIdeas = db.businessIdeas.filter((i) =>
+    cityIds.has(i.citizenId)
+  );
+  const totalIdeas = cityIdeas.length;
+  const highFitIdeas = cityIdeas.filter((i) => i.verdict.level === "go").length;
+  const fundedIdeas = cityIdeas.filter((i) =>
+    db.fundedIdeaIds.includes(i.id)
+  ).length;
+  const capexCommittedMin = cityIdeas
+    .filter((i) => db.fundedIdeaIds.includes(i.id))
+    .reduce((s, i) => s + (i.structured.estimatedCapex.min || 0), 0);
+  const capexCommittedMax = cityIdeas
+    .filter((i) => db.fundedIdeaIds.includes(i.id))
+    .reduce((s, i) => s + (i.structured.estimatedCapex.max || 0), 0);
+  const catCount = new Map<string, number>();
+  for (const i of cityIdeas) {
+    catCount.set(
+      i.structured.category,
+      (catCount.get(i.structured.category) ?? 0) + 1
+    );
+  }
+  const topCategories = [...catCount.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([cat]) => cat);
+
   return {
     totalCitizens,
     totalComplaints,
@@ -140,6 +175,12 @@ function collectMetrics(cityId: CityId): Metrics {
     openAlerts,
     recentProtocols,
     alertSummaries,
+    totalIdeas,
+    highFitIdeas,
+    fundedIdeas,
+    capexCommittedMin,
+    capexCommittedMax,
+    topCategories,
   };
 }
 
@@ -266,19 +307,29 @@ function fallbackFragments(
       content: [
         `# Just Transition — preparacao economica pos-mineracao (ICMM)`,
         ``,
-        `Em alinhamento com o framework ICMM de **just transition**, o JAZIDA AI mapeou e estruturou aspiracoes profissionais que **nao dependem da operacao mineraria** — ${m.totalTalents} talentos cadastrados, ${m.totalMatches} oportunidades cruzadas (cursos tecnicos, MEI, vagas locais nao-mineradoras).`,
+        `Em alinhamento com o framework ICMM de **just transition**, o JAZIDA AI mapeou e estruturou aspiracoes profissionais e oportunidades de empreendedorismo que **nao dependem da operacao mineraria**:`,
         ``,
-        `**Indicadores chave:**`,
-        `- Diversificacao economica: cidadaos engajados em saude, comercio, arte/cultura e tecnologia.`,
-        `- Capital humano local: parcerias mapeadas com SENAI, Senac, Sebrae e Universidade Federal de Ouro Preto.`,
-        `- Empreendedorismo: trilhas MEI estruturadas para reducao de dependencia direta da mineradora.`,
+        `**Capital humano:**`,
+        `- ${m.totalTalents} talentos cadastrados, ${m.totalMatches} oportunidades cruzadas (cursos tecnicos, MEI, vagas nao-mineradoras)`,
+        `- Parcerias mapeadas: SENAI, Senac, Sebrae, UFOP`,
         ``,
-        `Este eixo enderaca diretamente o risco de **dependencia economica** apontado nas auditorias ICMM Performance Expectations e da CVM 59 (relato sobre transicao).`,
+        `**Empreendedorismo local (agente Semente):**`,
+        `- ${m.totalIdeas} ideias de negocio avaliadas`,
+        `- ${m.highFitIdeas} oportunidades alta-fit (verdict GO)`,
+        `- ${m.fundedIdeas} ideias com capital semente aprovado`,
+        `- Capital comprometido: R$ ${m.capexCommittedMin.toLocaleString("pt-BR")} – R$ ${m.capexCommittedMax.toLocaleString("pt-BR")}`,
+        `- Categorias mapeadas: ${m.topCategories.length > 0 ? m.topCategories.join(", ") : "(em mapeamento)"}`,
+        ``,
+        `**KPI ESG agregado:** capital semente investido gera renda local recorrente, reduzindo dependencia direta da mineradora — metrica diretamente alinhada a ICMM Performance Expectation 9 (Social Performance) e CSRD ESRS S3 (Affected Communities — Just Transition).`,
       ].join("\n"),
       evidence: [
         { type: "metric", reference: `talentsMapped=${m.totalTalents}` },
         { type: "metric", reference: `opportunitiesMatched=${m.totalMatches}` },
+        { type: "metric", reference: `ideasAnalyzed=${m.totalIdeas}` },
+        { type: "metric", reference: `highFitIdeas=${m.highFitIdeas}` },
+        { type: "metric", reference: `fundedIdeas=${m.fundedIdeas}` },
         { type: "framework", reference: "ICMM Performance Expectations 9.4" },
+        { type: "framework", reference: "CSRD ESRS S3" },
       ],
     },
   ];

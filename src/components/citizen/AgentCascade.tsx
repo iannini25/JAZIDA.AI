@@ -36,6 +36,10 @@ const AGENT_LABELS: Record<string, string> = {
   Replica: "Replica preparando resposta",
   Pulsar: "Pulsar atualizando sentimento",
   Pacto: "Pacto gerando relatorio",
+  Semente: "Semente analisando ideia",
+  "Semente · demanda": "Semente cruzando demanda da cidade",
+  "Semente · competicao": "Semente medindo competicao",
+  "Semente · plano": "Semente montando plano de acao",
 };
 
 export function AgentCascade(props: AgentCascadeProps) {

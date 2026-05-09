@@ -8,6 +8,42 @@
 export type CityId = "mariana" | "itabira" | "paracatu" | "araxa";
 
 // ──────────────────────────────────────────────────────────
+// Auth & Usuarios
+// ──────────────────────────────────────────────────────────
+export type UserRole = "cidadao" | "funcionario";
+
+export type User = {
+  id: string;
+  username: string;
+  passwordHash: string; // hash simples (hackathon — nao usar em prod)
+  role: UserRole;
+  citizenId?: string; // se role=cidadao, vincula ao cidadao
+  displayName: string;
+  createdAt: string;
+};
+
+export type Session = {
+  token: string;
+  userId: string;
+  role: UserRole;
+  expiresAt: string;
+};
+
+// ──────────────────────────────────────────────────────────
+// Rate Limiting
+// ──────────────────────────────────────────────────────────
+export type RateLimitEntry = {
+  userId: string;
+  action: string; // "talent" | "complaint" | "idea"
+  timestamps: string[]; // ISO timestamps das acoes
+};
+
+// ──────────────────────────────────────────────────────────
+// Aprovacao de matches (Bussola -> Dashboard -> Cidadao)
+// ──────────────────────────────────────────────────────────
+export type MatchApprovalStatus = "pending" | "approved" | "rejected";
+
+// ──────────────────────────────────────────────────────────
 // Cidadao
 // ──────────────────────────────────────────────────────────
 export type Citizen = {
@@ -51,6 +87,8 @@ export type TalentEntry = {
     confidence: number; // 0-1
   };
   matches?: BussolaMatch[];
+  matchApprovalStatus?: MatchApprovalStatus; // pending=aguardando aprovacao no dashboard
+  matchApprovedBy?: string; // username de quem aprovou
   createdAt: string;
 };
 
@@ -89,7 +127,8 @@ export type AgentName =
   | "Bussola"
   | "Replica"
   | "Pulsar"
-  | "Pacto";
+  | "Pacto"
+  | "Semente";
 
 export type AgentEvent = {
   id: string;
@@ -137,6 +176,108 @@ export type ESGReportFragment = {
 };
 
 // ──────────────────────────────────────────────────────────
+// Empreendedorismo / Just Transition (Semente)
+// ──────────────────────────────────────────────────────────
+export type BusinessCategory =
+  | "comercio/alimentacao"
+  | "comercio/varejo"
+  | "servicos/beleza"
+  | "servicos/saude"
+  | "servicos/educacao"
+  | "servicos/manutencao"
+  | "industria/artesanato"
+  | "agricultura"
+  | "tecnologia"
+  | "transporte"
+  | "turismo"
+  | "moda/costura"
+  | "construcao"
+  | "outro";
+
+export type LegalForm = "MEI" | "ME" | "EI" | "EIRELI";
+
+export type BusinessIdeaStructured = {
+  title: string;
+  category: BusinessCategory | string;
+  description: string;
+  targetCustomer: string;
+  estimatedCapex: { min: number; max: number };
+  estimatedMonthlyRevenue: { min: number; max: number };
+  estimatedPaybackMonths: number;
+  suggestedLegalForm: LegalForm;
+};
+
+export type MarketAnalysis = {
+  demandSignal: {
+    score: number; // 0-100
+    evidence: string;
+    relatedTalents: number;
+  };
+  competitionLevel: "none" | "low" | "medium" | "saturated";
+  competitionEvidence: string;
+  localContentMatch?: {
+    potential: boolean;
+    description: string;
+  };
+};
+
+export type IdeaVerdictLevel = "go" | "adjust" | "pivot";
+
+export type IdeaVerdict = {
+  score: number; // 0-100
+  level: IdeaVerdictLevel;
+  headline: string;
+  reasoning: string;
+};
+
+export type ActionStep = {
+  order: number;
+  title: string;
+  description: string;
+  estimatedTime: string;
+  link?: string;
+};
+
+export type FundingOpportunity = {
+  name: string;
+  type: "grant" | "loan" | "training";
+  amount?: string;
+  eligibility: string;
+  contactInfo?: string;
+};
+
+export type ActionPlan = {
+  nextSteps: ActionStep[];
+  fundingOpportunities: FundingOpportunity[];
+};
+
+export type BusinessIdeaStatus =
+  | "pending"
+  | "analyzed"
+  | "submitted_to_funding";
+
+export type BusinessIdea = {
+  id: string;
+  citizenId: string;
+  rawInput: string;
+  structured: BusinessIdeaStructured;
+  marketAnalysis: MarketAnalysis;
+  verdict: IdeaVerdict;
+  actionPlan: ActionPlan;
+  status: BusinessIdeaStatus;
+  createdAt: string;
+};
+
+// Para agregacao no dashboard
+export type OpportunityAggregate = {
+  category: string;
+  pendingIdeasCount: number;
+  highFitCount: number;
+  totalCapexNeeded: { min: number; max: number };
+  topIdeas: BusinessIdea[];
+};
+
+// ──────────────────────────────────────────────────────────
 // Replica (mensagens aprovadas para envio)
 // Nao esta no master como tipo principal — usado internamente.
 // ──────────────────────────────────────────────────────────
@@ -158,7 +299,8 @@ export type ReplicaMessage = {
 export type HistoryItem =
   | { kind: "talent"; data: TalentEntry }
   | { kind: "complaint"; data: Complaint }
-  | { kind: "replica"; data: ReplicaMessage };
+  | { kind: "replica"; data: ReplicaMessage }
+  | { kind: "idea"; data: BusinessIdea };
 
 export type CitizenHistory = {
   citizen: Citizen;
@@ -168,4 +310,7 @@ export type CitizenHistory = {
 // ──────────────────────────────────────────────────────────
 // Cenarios de demo
 // ──────────────────────────────────────────────────────────
-export type DemoScenario = "maria_enfermagem" | "joaozinho_poeira";
+export type DemoScenario =
+  | "maria_enfermagem"
+  | "joaozinho_poeira"
+  | "beatriz_costura";

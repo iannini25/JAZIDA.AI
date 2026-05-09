@@ -10,9 +10,12 @@
 // O frontend faz polling em GET /talents ou escuta SSE pra ver os matches
 // chegando.
 
+import { NextRequest, NextResponse } from "next/server";
 import { db, newId, nowIso, saveDb } from "@/lib/db";
 import { badRequest, notFound, ok, safeJson } from "@/lib/http";
 import { onTalentReceived } from "@/lib/orchestrator";
+import { authenticate } from "@/lib/api-auth";
+import { checkRateLimit, recordAction } from "@/lib/rate-limit";
 import type { TalentEntry, TalentType } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +33,21 @@ export async function POST(
   req: Request,
   ctx: { params: { id: string } }
 ) {
+  // Rate limit (se autenticado)
+  const authCtx = authenticate(req as unknown as NextRequest);
+  if (authCtx) {
+    const rl = checkRateLimit(authCtx.user.id, "talent");
+    if (!rl.allowed) {
+      return NextResponse.json(
+        {
+          error: `Limite atingido: ${rl.limitPerWindow} talentos por hora. Tente novamente apos ${new Date(rl.resetAt).toLocaleTimeString("pt-BR")}.`,
+          rateLimit: rl,
+        },
+        { status: 429 }
+      );
+    }
+  }
+
   const citizen = db.citizens.find((c) => c.id === ctx.params.id);
   if (!citizen) return notFound("cidadao nao encontrado");
 
@@ -54,10 +72,16 @@ export async function POST(
       category: "outro",
       confidence: 0,
     },
+    matchApprovalStatus: "pending", // matches precisam aprovacao no dashboard
     createdAt: nowIso(),
   };
   db.talents.push(talent);
   saveDb();
+
+  // Registra acao no rate limiter
+  if (authCtx) {
+    recordAction(authCtx.user.id, "talent");
+  }
 
   // Async — nao bloqueia. Erros sao logados, talent fica com placeholder.
   void onTalentReceived({ citizen, talent, rawInput: body.rawInput });

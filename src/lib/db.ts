@@ -7,13 +7,17 @@ import { customAlphabet, nanoid } from "nanoid";
 import type {
   Alert,
   AgentEvent,
+  BusinessIdea,
   CityId,
   Citizen,
   Complaint,
   ESGReportFragment,
+  RateLimitEntry,
   ReplicaMessage,
   SentimentSnapshot,
+  Session,
   TalentEntry,
+  User,
 } from "@/types";
 
 export type DB = {
@@ -24,10 +28,17 @@ export type DB = {
   alerts: Alert[];
   replicas: ReplicaMessage[];
   esgFragments: ESGReportFragment[];
+  businessIdeas: BusinessIdea[];
   // cache do ultimo snapshot por cidade
   sentimentByCity: Partial<Record<CityId, SentimentSnapshot>>;
   // contador para protocolNumber sequencial
   protocolCounter: number;
+  // ideias marcadas como "vai financiar" (apenas state — nao move dinheiro)
+  fundedIdeaIds: string[];
+  // Auth
+  users: User[];
+  sessions: Session[];
+  rateLimits: RateLimitEntry[];
 };
 
 function emptyDb(): DB {
@@ -39,8 +50,13 @@ function emptyDb(): DB {
     alerts: [],
     replicas: [],
     esgFragments: [],
+    businessIdeas: [],
     sentimentByCity: {},
     protocolCounter: 0,
+    fundedIdeaIds: [],
+    users: [],
+    sessions: [],
+    rateLimits: [],
   };
 }
 

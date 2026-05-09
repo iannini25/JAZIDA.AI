@@ -19,6 +19,8 @@ import { NeighborhoodBars } from "@/components/dashboard/NeighborhoodBars";
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
 import { AgentLiveFeed } from "@/components/dashboard/AgentLiveFeed";
 import { ESGReportPreview } from "@/components/dashboard/ESGReportPreview";
+import { OpportunitiesPanel } from "@/components/dashboard/OpportunitiesPanel";
+import { MatchApprovalPanel } from "@/components/dashboard/MatchApprovalPanel";
 import { DemoTriggerWidget } from "@/components/dashboard/DemoTriggerWidget";
 import {
   generateEsgReport,
@@ -234,7 +236,7 @@ function DashboardOverview() {
           </Quadrant>
 
           <Quadrant
-            className="xl:col-span-7"
+            className="xl:col-span-5"
             title="Rascunho ESG (CSRD)"
             subtitle={
               esg
@@ -255,6 +257,28 @@ function DashboardOverview() {
               showAll={false}
               emptyHint="Gerando rascunho do ESG report..."
             />
+          </Quadrant>
+
+          <Quadrant
+            className="xl:col-span-7"
+            title="🌱 Oportunidades economicas detectadas"
+            subtitle="Just transition · agente Semente avalia ideias dos cidadaos"
+            rightAction={
+              <span className="text-[10px] font-bold uppercase tracking-wider text-brand-green">
+                KPI ESG
+              </span>
+            }
+          >
+            <OpportunitiesPanel />
+          </Quadrant>
+
+          <Quadrant
+            className="xl:col-span-12"
+            title="Aprovacao de recomendacoes"
+            subtitle="Recomendacoes da Bussola precisam de aprovacao antes de chegar ao cidadao"
+            bodyClassName="max-h-[600px] overflow-y-auto"
+          >
+            <MatchApprovalPanel />
           </Quadrant>
         </div>
       </main>

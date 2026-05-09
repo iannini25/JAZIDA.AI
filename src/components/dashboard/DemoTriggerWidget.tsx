@@ -62,6 +62,12 @@ export function DemoTriggerWidget() {
           loading={busy === "maria_enfermagem"}
         />
         <DemoButton
+          label="🌱 Beatriz tem ideia de costura"
+          subtitle="Semente analisa demanda + plano"
+          onClick={() => fire("beatriz_costura")}
+          loading={busy === "beatriz_costura"}
+        />
+        <DemoButton
           label="▶ Joao reclama de poeira"
           subtitle="Voz + Pulsar + Vigia"
           onClick={() => fire("joaozinho_poeira")}

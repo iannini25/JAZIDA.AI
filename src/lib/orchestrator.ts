@@ -17,8 +17,10 @@ import * as Bussola from "@/lib/agents/bussola";
 import * as Replica from "@/lib/agents/replica";
 import * as Pulsar from "@/lib/agents/pulsar";
 import * as Pacto from "@/lib/agents/pacto";
+import * as Semente from "@/lib/agents/semente";
 import type {
   Alert,
+  BusinessIdea,
   Citizen,
   CityId,
   Complaint,
@@ -28,7 +30,7 @@ import type {
   TalentEntry,
 } from "@/types";
 
-export { Acolhida, Talento, Voz, Bussola, Replica, Pulsar, Pacto };
+export { Acolhida, Talento, Voz, Bussola, Replica, Pulsar, Pacto, Semente };
 
 // ──────────────────────────────────────────────────────────
 // Talento: roda agent + dispara Bussola assincrono
@@ -201,4 +203,14 @@ export async function generateEsg(args: {
 }): Promise<ESGReportFragment[]> {
   const out = await Pacto.run(args);
   return out.fragments;
+}
+
+// ──────────────────────────────────────────────────────────
+// Semente — avalia ideia de negocio
+// ──────────────────────────────────────────────────────────
+export async function evaluateBusinessIdea(args: {
+  citizen: Citizen;
+  rawInput: string;
+}): Promise<BusinessIdea> {
+  return Semente.run({ citizen: args.citizen, rawInput: args.rawInput });
 }

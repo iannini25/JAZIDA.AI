@@ -16,6 +16,7 @@ import {
 } from "@/lib/db";
 import { badRequest, ok } from "@/lib/http";
 import {
+  evaluateBusinessIdea,
   generateReplica,
   onComplaintReceived,
   onTalentReceived,
@@ -29,7 +30,11 @@ import type {
 
 export const dynamic = "force-dynamic";
 
-const SUPPORTED: DemoScenario[] = ["maria_enfermagem", "joaozinho_poeira"];
+const SUPPORTED: DemoScenario[] = [
+  "maria_enfermagem",
+  "joaozinho_poeira",
+  "beatriz_costura",
+];
 
 export async function POST(
   _req: Request,
@@ -43,6 +48,7 @@ export async function POST(
   }
 
   if (scenario === "maria_enfermagem") return ok(await triggerMaria());
+  if (scenario === "beatriz_costura") return ok(await triggerBeatriz());
   return ok(await triggerJoao());
 }
 
@@ -171,5 +177,32 @@ async function triggerJoao() {
     complaint,
     alert: alert ?? null,
     note: "Cadeia real: Voz + Pulsar + Vigia.",
+  };
+}
+
+// ──────────────────────────────────────────────────────────
+// Beatriz — Semente avalia ideia de costureira (just transition)
+// ──────────────────────────────────────────────────────────
+async function triggerBeatriz() {
+  const beatriz = ensureCitizen("Beatriz Oliveira", {
+    age: 22,
+    neighborhood: "Cabanas",
+    occupation: "Estudante",
+    phone: "+5531999990005",
+  });
+
+  const rawInput =
+    "Tava pensando em comecar a vender vestido de noiva, sei costurar e tenho uma maquina velha da minha avo. Mas nao sei se vale a pena. Tem mercado aqui?";
+
+  const idea = await evaluateBusinessIdea({
+    citizen: beatriz,
+    rawInput,
+  });
+
+  return {
+    scenario: "beatriz_costura" as const,
+    citizenId: beatriz.id,
+    idea,
+    note: "Cadeia real: Semente analisa demanda + competicao + plano de acao.",
   };
 }

@@ -50,3 +50,9 @@ coverage/
 *.local
 tmp/
 temp/
+
+# Persistencia local do DB in-memory
+.data/
+
+# Claude Code per-user settings
+.claude/

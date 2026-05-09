@@ -2,17 +2,30 @@
 // Usa fetch nativo (no cache, force-dynamic). Tipos vem de @/types.
 
 import type {
+  BusinessIdea,
   Citizen,
   CitizenHistory,
   Complaint,
   TalentEntry,
 } from "@/types";
+import { getAuthToken } from "@/lib/auth-storage";
 
 const baseUrl =
   typeof window !== "undefined" ? "" : process.env.APP_BASE_URL || "";
 
 function url(path: string): string {
   return `${baseUrl}${path}`;
+}
+
+function authHeaders(): Record<string, string> {
+  const token = getAuthToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
 }
 
 async function jsonOrThrow<T>(res: Response): Promise<T> {
@@ -60,7 +73,7 @@ export async function addTalent(
 ): Promise<AddTalentResponse> {
   const res = await fetch(url(`/api/citizens/${citizenId}/talents`), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders(),
     body: JSON.stringify({ rawInput, type }),
     cache: "no-store",
   });
@@ -112,11 +125,53 @@ export async function submitComplaint(
 ): Promise<{ complaint: Complaint; alert: unknown | null }> {
   const res = await fetch(url(`/api/citizens/${citizenId}/complaints`), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders(),
     body: JSON.stringify(payload),
     cache: "no-store",
   });
   return jsonOrThrow<{ complaint: Complaint; alert: unknown | null }>(res);
+}
+
+// ──────────────────────────────────────────────────────────
+// Ideias de negocio (Semente)
+// ──────────────────────────────────────────────────────────
+export type SubmitIdeaResponse = {
+  ideaId: string;
+  idea: BusinessIdea;
+};
+
+export async function submitBusinessIdea(
+  citizenId: string,
+  rawInput: string
+): Promise<SubmitIdeaResponse> {
+  const res = await fetch(url(`/api/citizens/${citizenId}/ideas`), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ rawInput }),
+    cache: "no-store",
+  });
+  return jsonOrThrow<SubmitIdeaResponse>(res);
+}
+
+export async function getBusinessIdea(
+  citizenId: string,
+  ideaId: string
+): Promise<BusinessIdea> {
+  const res = await fetch(
+    url(`/api/citizens/${citizenId}/ideas/${ideaId}`),
+    { cache: "no-store" }
+  );
+  return jsonOrThrow<BusinessIdea>(res);
+}
+
+export async function listBusinessIdeas(
+  citizenId: string
+): Promise<BusinessIdea[]> {
+  const res = await fetch(url(`/api/citizens/${citizenId}/ideas`), {
+    cache: "no-store",
+  });
+  const data = await jsonOrThrow<{ ideas: BusinessIdea[] }>(res);
+  return data.ideas;
 }
 
 // ──────────────────────────────────────────────────────────
